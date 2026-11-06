@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Amir Pournajib Portfolio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+/* Layout: hero, then an interactive system walkthrough (pipeline + phone), then results, a connected-vehicle lens table, decisions, lessons. Clinical ink with ECG-red signal and teal data flow. */
+:root{
+  --bg:#F3F5F7; --surface:#FFFFFF; --ink:#14273A; --muted:#566A7C; --line:#D6DDE4;
+  --accent:#C8403A; --accent-soft:#F7E3E1; --teal:#1F6F78; --teal-soft:#DDEFF0; --warn:#B7791F;
+  --display:"Sora","Segoe UI",system-ui,sans-serif;
+  --body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1721; --surface:#15222E; --ink:#E6EDF3; --muted:#9BABBB; --line:#2A3A49;
+    --accent:#F0716A; --accent-soft:#3A2224; --teal:#5FB7BF; --teal-soft:#16353A; --warn:#E3A84A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1721; --surface:#15222E; --ink:#E6EDF3; --muted:#9BABBB; --line:#2A3A49;
+  --accent:#F0716A; --accent-soft:#3A2224; --teal:#5FB7BF; --teal-soft:#16353A; --warn:#E3A84A; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg); color:var(--ink); font-family:var(--body); font-size:17px; line-height:1.6}
+.wrap{max-width:1100px; margin:0 auto; padding:40px 20px 72px}
+.read{max-width:68ch}
+h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0; line-height:1.2}
+h1{font-size:clamp(28px,4.8vw,44px); font-weight:700}
+h2{font-size:24px; font-weight:600; margin-bottom:14px}
+h3{font-size:17px; font-weight:600; margin-bottom:6px}
+p{margin:0 0 14px}
+.label{font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:10px}
+.lede{font-size:19px; color:var(--muted); margin-top:14px}
+.who{display:flex; flex-wrap:wrap; gap:6px 18px; color:var(--muted); font-size:15px; margin:18px 0 0}
+.who strong{color:var(--ink); font-weight:600}
+section{margin-top:56px}
+.trace{display:block; width:100%; max-width:360px; height:34px; margin:18px 0 4px}
+.trace path{fill:none; stroke:var(--accent); stroke-width:2; stroke-dasharray:520; stroke-dashoffset:0}
+@media (prefers-reduced-motion:no-preference){ .trace path{animation:draw 3.2s ease-in-out infinite} }
+@keyframes draw{0%{stroke-dashoffset:520}55%{stroke-dashoffset:0}100%{stroke-dashoffset:0}}
+
+/* Walkthrough */
+.stage{display:grid; grid-template-columns:minmax(0,1fr) 270px; gap:22px; background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:22px}
+@media (max-width:860px){ .stage{grid-template-columns:1fr} .phone{margin:0 auto} }
+.pipe{overflow-x:auto}
+.pipe svg{display:block; width:100%; min-width:560px; height:auto}
+.node rect{fill:var(--bg); stroke:var(--line); stroke-width:1.5; transition:fill .3s, stroke .3s}
+.node.on rect{fill:var(--teal-soft); stroke:var(--teal)}
+.node.ai.on rect{fill:var(--accent-soft); stroke:var(--accent)}
+.node text{fill:var(--ink); font-family:var(--body); font-size:14px; font-weight:600}
+.node .sub{fill:var(--muted); font-size:11.5px; font-weight:400}
+.link{stroke:var(--line); stroke-width:2.5; fill:none; transition:stroke .3s}
+.link.on{stroke:var(--teal)}
+.link.down{stroke:var(--warn); stroke-dasharray:6 6}
+.pkt{fill:var(--teal); opacity:0}
+.pkt.ai{fill:var(--accent)}
+.linklabel{fill:var(--muted); font-family:var(--mono); font-size:10.5px}
+.steps{display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 14px}
+.steps button{font:500 13px var(--body); color:var(--muted); background:var(--bg); border:1px solid var(--line); border-radius:999px; padding:7px 12px; cursor:pointer}
+.steps button[aria-pressed="true"]{color:var(--surface); background:var(--teal); border-color:var(--teal)}
+.steps button:focus-visible,.ctrl button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.explain h3{font-size:19px}
+.explain p{color:var(--muted); margin:0}
+.explain .why{margin-top:10px; font-size:15px; color:var(--ink); border-left:3px solid var(--accent); padding-left:12px}
+.ctrl{display:flex; flex-wrap:wrap; gap:10px; margin-top:16px}
+.ctrl button{font:600 14px var(--body); border-radius:8px; padding:9px 14px; cursor:pointer; border:1px solid var(--teal); background:var(--teal); color:var(--surface)}
+.ctrl button.ghost{background:transparent; color:var(--teal)}
+
+/* Phone mockup */
+.phone{width:250px; height:500px; border-radius:36px; border:9px solid var(--ink); background:var(--bg); position:relative; overflow:hidden; box-shadow:0 18px 40px rgba(20,39,58,.18)}
+.phone:before{content:""; position:absolute; top:8px; left:50%; transform:translateX(-50%); width:70px; height:18px; border-radius:10px; background:var(--ink)}
+.screen{position:absolute; inset:38px 14px 16px; display:flex; flex-direction:column; gap:10px; font-size:13px}
+.bar{display:flex; justify-content:space-between; align-items:center; font-size:11.5px; color:var(--muted)}
+.chip{font:600 11px var(--body); padding:3px 8px; border-radius:999px; background:var(--teal-soft); color:var(--teal)}
+.chip.warn{background:var(--accent-soft); color:var(--warn)}
+.scard{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px}
+.scard h4{margin:0 0 6px; font:600 14px var(--display)}
+.row{display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid var(--line); font-size:12.5px}
+.row:last-child{border-bottom:0}
+.row span:first-child{color:var(--muted)}
+.bp{font:700 34px var(--display); font-variant-numeric:tabular-nums; line-height:1.1}
+.bp small{font:500 13px var(--body); color:var(--muted)}
+.ecg{width:100%; height:60px}
+.ecg path{fill:none; stroke:var(--accent); stroke-width:2}
+.spark path{fill:none; stroke:var(--teal); stroke-width:2}
+.spark .area{fill:var(--teal-soft); stroke:none}
+.note{font-size:10.5px; color:var(--muted); text-align:center; margin-top:auto}
+.btnfake{background:var(--teal); color:var(--surface); text-align:center; border-radius:10px; padding:9px; font-weight:600; font-size:13px}
+.spin{width:28px; height:28px; border-radius:50%; border:3px solid var(--line); border-top-color:var(--accent); margin:8px auto}
+@media (prefers-reduced-motion:no-preference){ .spin{animation:rot 1s linear infinite} }
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* Hero and product gallery */
+.hero{display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); gap:32px; align-items:center}
+@media (max-width:860px){ .hero{grid-template-columns:1fr} }
+.shot{margin:0; background:#1A63C9; border-radius:16px; overflow:hidden; border:1px solid var(--line)}
+.shot img{display:block; width:100%; height:auto}
+.gallery{display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:18px; align-items:start}
+@media (max-width:760px){ .gallery{grid-template-columns:1fr} }
+.gcard{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:16px}
+.gcard img{display:block; width:100%; height:auto; border-radius:10px}
+.gcard.tall img{max-height:520px; object-fit:cover; object-position:top}
+.gcard h3{margin-top:14px}
+.gcard p{margin:0; color:var(--muted); font-size:15px}
+.duo{display:grid; grid-template-columns:repeat(2,1fr); gap:18px}
+@media (max-width:760px){ .duo{grid-template-columns:1fr} }
+.col{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:20px}
+.col h3{font-size:19px; margin-bottom:12px}
+.col ul{margin:0; padding-left:18px}
+.col li{margin-bottom:9px; font-size:15.5px}
+.col .tag{font:600 11px var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--teal); margin-bottom:8px}
+.more{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px}
+.more .card h3{font-size:18px}
+.more .meta{font:500 12px var(--mono); color:var(--muted); margin-bottom:8px; letter-spacing:.04em}
+/* Additional case studies */
+.cs{margin-top:88px; padding-top:40px; border-top:2px solid var(--line)}
+.flow{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px; overflow-x:auto}
+.flow svg{display:block; width:100%; min-width:820px; height:auto}
+.flow .b{fill:var(--bg); stroke:var(--line); stroke-width:1.5}
+.flow .bt{fill:var(--teal-soft); stroke:var(--teal); stroke-width:1.5}
+.flow .ba{fill:var(--accent-soft); stroke:var(--accent); stroke-width:1.5}
+.flow .t{fill:var(--ink); font:600 14px var(--body)}
+.flow .s{fill:var(--muted); font:400 12px var(--body)}
+.flow .m{fill:var(--muted); font:500 10.5px var(--mono); letter-spacing:.05em}
+.flow .w{stroke:var(--teal); stroke-width:2.5; fill:none; stroke-dasharray:7 7}
+.flow .h{fill:var(--teal)}
+@media (prefers-reduced-motion:no-preference){ .flow .w{animation:flowdash 1.2s linear infinite} }
+@keyframes flowdash{to{stroke-dashoffset:-14}}
+.press{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px}
+.press a{font-size:14px; background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:7px 13px; text-decoration:none}
+.press a:hover{border-color:var(--teal)}
+.toc{display:flex; flex-wrap:wrap; gap:10px; margin-top:22px}
+.toc a{font:600 14px var(--body); text-decoration:none; color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:10px 14px}
+.toc a span{display:block; font:500 11px var(--mono); color:var(--accent); letter-spacing:.06em}
+/* Rivian fit and critique */
+.fit{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:12px}
+.fitc{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:16px 18px; display:grid; gap:6px}
+.fitc .ask{font:600 12px var(--mono); letter-spacing:.05em; text-transform:uppercase; color:var(--muted)}
+.fitc .proof{font-size:15.5px}
+.fitc .proof b{color:var(--teal)}
+.intro{background:var(--ink); color:var(--bg); border-radius:16px; padding:24px 26px; margin-top:28px}
+.intro p{margin:0; font-size:17px; max-width:75ch}
+.intro .label{color:var(--accent)}
+.crit{display:grid; grid-template-columns:repeat(2,1fr); gap:14px}
+@media (max-width:760px){ .crit{grid-template-columns:1fr} }
+.crit .card ul{margin:8px 0 0; padding-left:18px; color:var(--muted); font-size:15px}
+.idea{background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--teal); border-radius:12px; padding:18px 20px}
+.idea h3{font-size:18px}
+.idea p{margin:6px 0 0; color:var(--muted); font-size:15.5px}
+.idea .metric{margin-top:10px; font:500 13px var(--mono); color:var(--teal)}
+.idea .from{margin-top:6px; font-size:14px; color:var(--ink)}
+.ideas{display:grid; gap:12px}
+.txg{display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-top:26px}
+@media (max-width:760px){ .txg{grid-template-columns:1fr} }
+.txg figure{margin:0; background:var(--surface); border:1px solid var(--line); border-radius:12px; overflow:hidden}
+.txg img{display:block; width:100%; height:auto}
+.txg figcaption{padding:10px 14px; font-size:13.5px; color:var(--muted)}
+/* Sticky menu */
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} }
+[id]{scroll-margin-top:76px}
+.topnav{position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border-bottom:1px solid var(--line)}
+.topnav .in{max-width:1100px; margin:0 auto; padding:10px 20px; display:flex; align-items:center; gap:18px}
+.topnav .brand{font:700 15px var(--display); color:var(--ink); text-decoration:none; white-space:nowrap}
+.topnav .brand span{color:var(--accent)}
+.topnav ul{list-style:none; margin:0 0 0 auto; padding:0; display:flex; gap:4px; overflow-x:auto; scrollbar-width:none}
+.topnav ul::-webkit-scrollbar{display:none}
+.topnav a.m{display:block; white-space:nowrap; font:500 14px var(--body); color:var(--muted); text-decoration:none; padding:8px 12px; border-radius:8px; transition:background .2s,color .2s}
+.topnav a.m:hover{background:var(--surface); color:var(--ink)}
+.topnav a.m.active{background:var(--teal); color:var(--surface)}
+.topnav a:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+@media (max-width:760px){ .topnav .in{flex-direction:column; align-items:stretch; gap:6px; padding:8px 12px} .topnav ul{margin:0} .topnav .brand{display:none} }
+/* Fit cards with visuals */
+.fit{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px}
+@media (max-width:900px){ .fit{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:560px){ .fit{grid-template-columns:1fr} }
+.fitc{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:0; overflow:hidden; display:flex; flex-direction:column; gap:0; transition:transform .2s, box-shadow .2s}
+.fitc:hover{transform:translateY(-2px); box-shadow:0 10px 26px rgba(20,39,58,.10)}
+@media (prefers-reduced-motion:reduce){ .fitc,.fitc:hover{transition:none; transform:none} }
+.fitc .vis{aspect-ratio:16/10; background:var(--bg); border-bottom:1px solid var(--line); overflow:hidden}
+.fitc .vis img{width:100%; height:100%; object-fit:cover; display:block}
+.fitc .vis svg{width:100%; height:100%; display:block}
+.fitc .txt{padding:16px 18px 18px; display:grid; gap:8px}
+.fitc .ask{font:600 16px var(--display); color:var(--ink); letter-spacing:0; text-transform:none; line-height:1.3}
+.fitc .proof{font-size:15px; color:var(--muted)}
+.fitc .proof b{color:var(--teal); font-weight:600}
+.vis .bg{fill:var(--bg)} .vis .card{fill:var(--surface); stroke:var(--line)} .vis .ink{fill:var(--ink)} .vis .mut{fill:var(--muted)}
+.vis .tl{stroke:var(--teal); fill:none; stroke-width:3; stroke-linecap:round} .vis .tf{fill:var(--teal)} .vis .af{fill:var(--accent)} .vis .al{stroke:var(--accent); fill:none; stroke-width:3; stroke-linecap:round}
+.vis .soft{fill:var(--teal-soft)} .vis .asoft{fill:var(--accent-soft)} .vis .ln{stroke:var(--line); stroke-width:2; fill:none}
+.vis text{font-family:var(--body)}
+/* Fact cards with visuals */
+.facts{grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px}
+@media (max-width:900px){ .facts{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:480px){ .facts{grid-template-columns:1fr} }
+.facts .fact{padding:0; overflow:hidden; display:flex; flex-direction:column}
+.fact .vis{aspect-ratio:16/10; background:var(--bg); border-bottom:1px solid var(--line); overflow:hidden}
+.fact .vis img{width:100%; height:100%; object-fit:cover; display:block}
+.fact .vis svg{width:100%; height:100%; display:block}
+.fact .ft{padding:14px 16px 16px}
+/* Motion and graphics */
+.ic{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; flex:none}
+.icb{display:inline-grid; place-items:center; width:42px; height:42px; border-radius:12px; background:var(--teal-soft); color:var(--teal); margin-bottom:12px}
+.icb.red{background:var(--accent-soft); color:var(--accent)}
+.reveal{transition:transform .7s cubic-bezier(.2,.7,.2,1), opacity .7s}
+.js .reveal.pre{transform:translateY(18px); opacity:.35}
+@media (prefers-reduced-motion:reduce){ .js .reveal.pre{transform:none; opacity:1} }
+.lift{transition:transform .25s, box-shadow .25s, border-color .25s}
+.lift:hover{transform:translateY(-3px); box-shadow:0 14px 30px rgba(20,39,58,.12); border-color:var(--teal)}
+@media (prefers-reduced-motion:reduce){ .lift:hover{transform:none} }
+.col .head{display:flex; align-items:center; gap:12px; margin-bottom:12px}
+.col .head .icb{margin:0}
+.col .head h3{margin:0}
+.col li::marker{color:var(--teal)}
+.stack{display:flex; flex-wrap:wrap; gap:8px; margin-top:18px}
+.stack .grp{font:600 11px var(--mono); letter-spacing:.06em; color:var(--muted); align-self:center; margin-right:2px}
+.pill{display:inline-flex; align-items:center; gap:7px; font:600 13px var(--body); padding:7px 12px; border-radius:999px; background:var(--surface); border:1px solid var(--line); color:var(--ink)}
+.pill i{width:8px; height:8px; border-radius:50%; background:var(--teal)}
+.pill.c i{background:#2F6FD6} .pill.a i{background:#E38B2C} .pill.j i{background:#2563EB} .pill.f i{background:var(--accent)} .pill.u i{background:#8B5CF6}
+.badge{display:inline-flex; align-items:center; gap:6px; font:600 12px var(--mono); letter-spacing:.04em; padding:6px 10px; border-radius:8px; background:var(--teal-soft); color:var(--teal)}
+.badges{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px}
+.result{position:relative; overflow:hidden}
+.result .viz{margin-top:14px; height:46px}
+.result .viz svg{width:100%; height:100%; display:block}
+.bar{height:8px; border-radius:6px; background:var(--line); overflow:hidden; margin-top:8px}
+.bar b{display:block; height:100%; border-radius:6px; background:var(--teal); width:var(--w); transition:width 1.4s cubic-bezier(.2,.7,.2,1)}
+.bar.red b{background:var(--accent)}
+.js .pre .bar b{width:0}
+.vlbl{display:flex; justify-content:space-between; font:500 11px var(--mono); color:var(--muted); margin-top:6px}
+.dots{display:grid; grid-template-columns:repeat(16,1fr); gap:5px; margin-top:14px}
+.dots i{aspect-ratio:1; border-radius:50%; background:var(--teal); transition:transform .4s, opacity .4s}
+.js .pre .dots i{transform:scale(.2); opacity:.2}
+.gates{display:grid; grid-template-columns:repeat(5,1fr); gap:4px; margin-top:14px}
+.gates span{height:8px; border-radius:4px; background:var(--teal); transition:opacity .4s}
+.js .pre .gates span{opacity:.15}
+.gates + .vlbl{font-size:10px}
+.wk{display:grid; grid-template-columns:repeat(10,1fr); gap:4px; margin-top:14px}
+.wk span{height:22px; border-radius:4px; background:var(--teal); transition:opacity .3s}
+.js .pre .wk span{opacity:.15}
+.arc{stroke:var(--line); stroke-width:10; fill:none; stroke-linecap:round}
+.arcv{stroke:var(--accent); stroke-width:10; fill:none; stroke-linecap:round; transition:stroke-dashoffset 1.6s cubic-bezier(.2,.7,.2,1)}
+tbody tr{transition:background .2s}
+tbody tr:hover{background:var(--teal-soft)}
+td .cell{display:flex; gap:10px; align-items:flex-start}
+td .cell .ic{color:var(--teal); margin-top:2px}
+td .arrow{color:var(--accent); font-weight:700; margin-right:6px}
+.dec{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; position:relative}
+@media (max-width:900px){ .dec{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:520px){ .dec{grid-template-columns:1fr} }
+.dec .card{position:relative}
+.dec .step{font:600 11px var(--mono); color:var(--accent); letter-spacing:.06em}
+.dec .card h3{margin-top:4px}
+.track{height:3px; background:var(--line); border-radius:2px; margin:0 0 18px; overflow:hidden}
+.track b{display:block; height:100%; width:100%; background:linear-gradient(90deg,var(--teal),var(--accent)); transform-origin:left; transition:transform 1.6s cubic-bezier(.2,.7,.2,1)}
+.js .pre .track b{transform:scaleX(0)}
+.lessons2{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px}
+@media (max-width:640px){ .lessons2{grid-template-columns:1fr} }
+.lesson{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:18px; display:flex; gap:14px}
+.lesson .icb{margin:0}
+.lesson b{display:block; font:600 16px var(--display); margin-bottom:4px}
+.lesson p{margin:0; color:var(--muted); font-size:15px}
+.critl{list-style:none; padding:0 !important; margin:10px 0 0 !important}
+.critl li{display:flex; gap:10px; align-items:flex-start; margin-bottom:10px}
+.critl .ic{width:18px; height:18px; margin-top:3px}
+.good .ic{color:var(--teal)} .bad .ic{color:var(--warn)}
+.idea2{display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:22px; align-items:center}
+@media (max-width:760px){ .idea2{grid-template-columns:1fr} }
+.mock{background:var(--bg); border:1px solid var(--line); border-radius:16px; padding:16px; min-height:150px; display:grid; gap:10px; align-content:center}
+.mock .mt{font:600 11px var(--mono); color:var(--muted); letter-spacing:.06em}
+.steps3{display:grid; grid-template-columns:repeat(3,1fr); gap:6px}
+.steps3 div{font:600 12px var(--body); text-align:center; padding:8px 4px; border-radius:8px; background:var(--surface); border:1px solid var(--line); color:var(--muted); transition:all .3s}
+.steps3 div.on{background:var(--teal); color:var(--surface); border-color:var(--teal)}
+.steps3 div.wait{background:var(--accent-soft); color:var(--accent); border-color:var(--accent)}
+.mock .note2{font-size:12.5px; color:var(--muted)}
+.tile{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center}
+.tile .v{font:700 22px var(--display)}
+.fresh{display:inline-flex; align-items:center; gap:6px; font:600 11.5px var(--body); color:var(--teal)}
+.fresh i{width:8px; height:8px; border-radius:50%; background:currentColor}
+@media (prefers-reduced-motion:no-preference){ .fresh i{animation:pulse 1.8s ease-in-out infinite} }
+@keyframes pulse{0%,100%{opacity:1; transform:scale(1)}50%{opacity:.35; transform:scale(.7)}}
+.fresh.old{color:var(--warn)}
+.wgrid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px}
+.wdg{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:10px 12px}
+.wdg span{display:block; font:500 11px var(--body); color:var(--muted)}
+.wdg b{font:700 18px var(--display)}
+.wdg .bar{margin-top:6px}
+.agentdot{fill:var(--accent)}
+/* Facts and results */
+.facts{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-top:26px}
+.fact{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:14px 16px}
+.fact span{display:block; font-size:13px; color:var(--muted)}
+.fact b{font-weight:600}
+.results{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px}
+.result{background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--accent); border-radius:10px; padding:18px}
+.big{font:700 34px var(--display); font-variant-numeric:tabular-nums; line-height:1.1}
+.result p{margin:6px 0 0; color:var(--muted); font-size:15px}
+
+/* Lens table */
+.tablewrap{overflow-x:auto; background:var(--surface); border:1px solid var(--line); border-radius:12px}
+table{border-collapse:collapse; width:100%; min-width:720px; font-size:15px}
+th,td{text-align:left; padding:14px 16px; border-bottom:1px solid var(--line); vertical-align:top}
+th{font:600 12px var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--muted); background:var(--bg)}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600}
+td:last-child{color:var(--teal); font-weight:500}
+
+.grid2{display:grid; grid-template-columns:repeat(2,1fr); gap:14px}
+@media (max-width:640px){ .grid2{grid-template-columns:1fr} }
+.card{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:18px}
+.card p{margin:0; color:var(--muted); font-size:15.5px}
+ul.lessons{padding-left:20px; margin:0}
+ul.lessons li{margin-bottom:8px}
+.caption{font-size:14px; color:var(--muted); margin-top:12px}
+footer{margin-top:60px; padding-top:20px; border-top:1px solid var(--line); color:var(--muted); font-size:14px}
+a{color:var(--teal)}
+@media (max-width:420px){ body{font-size:16px} .big{font-size:28px} }
+</style>
+</head>
+<body id="top">
+<nav class="topnav" aria-label="Portfolio menu"><div class="in">
+  <a class="brand" href="#top">Amir Pournajib<span>.</span></a>
+  <ul>
+    <li><a class="m" href="#about">About</a></li>
+    <li><a class="m" href="#healthgauge">HealthGauge</a></li>
+    <li><a class="m" href="#texavie">Texavie</a></li>
+    <li><a class="m" href="#mfl">My Fertility Labs</a></li>
+    <li><a class="m" href="#contact">Contact</a></li>
+  </ul>
+</div></nav>
+<div class="wrap">
+
+  <section id="about" class="intro" style="margin-top:0;margin-bottom:44px">
+    <div class="label">Amir Pournajib, PMP</div>
+    <h1 style="color:var(--bg);font-size:clamp(26px,4vw,38px);margin-bottom:12px">Product manager for connected devices, mobile apps and AI</h1>
+    <p>I build products where an app, a device, a cloud and an AI model have to work as one: from a smartwatch that estimates blood pressure, to a smart glove I designed down to the circuit board, to AI agents that run a clinic's patient flow. Electrical engineer by training, M.Sc. in Computer Science (AI), PMP. Based in North Vancouver.</p>
+  </section>
+
+  <header class="hero">
+    <div>
+      <div class="label">Case study 01 · Connected device, mobile app, cloud AI</div>
+      <h1>Cuffless blood pressure on a smartwatch</h1>
+      <svg class="trace" viewBox="0 0 360 34" aria-hidden="true"><path d="M0 22 H70 l8 -4 l6 4 H120 l6 6 l8 -26 l8 30 l6 -10 H210 l10 -6 l10 6 H360"/></svg>
+      <p class="lede">A real product: iOS, Android and web apps that paired with a third-party watch over Bluetooth, calibrated each user against a standard cuff, and used a cloud AI model to estimate blood pressure from ECG and PPG signals.</p>
+      <div class="who">
+        <span><strong>Amir Pournajib, PMP</strong></span>
+        <span>Product Manager, HealthGauge</span>
+        <span>Nov 2019 to Oct 2022</span>
+      </div>
+    </div>
+    <figure class="shot"><img src="hg-app-web.jpg" alt="HealthGauge phone app showing heart rate, blood pressure, HRV, live ECG and PPG, and the web dashboard with blood pressure and heart rate history" width="576" height="342"></figure>
+  </header>
+
+  <section id="healthgauge" aria-labelledby="walk">
+    <div class="label">Walk through the system</div>
+    <h2 id="walk">From the watch to a number people trust</h2>
+    <div class="stage">
+      <div>
+        <div class="pipe">
+          <svg viewBox="0 0 640 230" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path id="l-cw" class="link" d="M110 70 C150 70 150 150 190 150"/>
+            <path id="l-wp" class="link" d="M290 150 L360 150"/>
+            <path id="l-pc" class="link" d="M460 150 C500 150 500 70 540 70"/>
+            <path id="l-cp" class="link" d="M560 105 C560 200 470 200 430 185"/>
+            <text class="linklabel" x="300" y="138">BLUETOOTH</text>
+            <text class="linklabel" x="470" y="100">HTTPS</text>
+            <text class="linklabel" x="470" y="214">PREDICTION</text>
+            <g id="n-cuff" class="node"><rect x="10" y="40" width="100" height="62" rx="10"/><text x="60" y="68" text-anchor="middle">Cuff</text><text class="sub" x="60" y="86" text-anchor="middle">weekly reading</text></g>
+            <g id="n-watch" class="node"><rect x="190" y="118" width="100" height="62" rx="10"/><text x="240" y="146" text-anchor="middle">Watch</text><text class="sub" x="240" y="164" text-anchor="middle">ECG + PPG</text></g>
+            <g id="n-phone" class="node"><rect x="360" y="118" width="100" height="62" rx="10"/><text x="410" y="146" text-anchor="middle">Phone app</text><text class="sub" x="410" y="164" text-anchor="middle">iOS, Android</text></g>
+            <g id="n-cloud" class="node ai"><rect x="510" y="40" width="120" height="62" rx="10"/><text x="570" y="68" text-anchor="middle">Cloud AI</text><text class="sub" x="570" y="86" text-anchor="middle">PTT, PAT model</text></g>
+            <circle id="p1" class="pkt" r="5"/><circle id="p2" class="pkt" r="5"/><circle id="p3" class="pkt" r="5"/>
+          </svg>
+        </div>
+        <div class="steps" role="group" aria-label="Steps">
+          <button data-i="0">1 Profile</button><button data-i="1">2 Calibrate</button><button data-i="2">3 Record</button><button data-i="3">4 Sync</button><button data-i="4">5 Predict</button><button data-i="5">6 Result</button>
+        </div>
+        <div class="explain" aria-live="polite">
+          <h3 id="st-title"></h3>
+          <p id="st-body"></p>
+          <p class="why" id="st-why"></p>
+        </div>
+        <div class="ctrl">
+          <button id="play" type="button">Pause</button>
+          <button id="drop" class="ghost" type="button">Simulate a dropped connection</button>
+        </div>
+      </div>
+      <div class="phone" aria-label="Illustration of the app screen for this step"><div class="screen" id="screen"></div></div>
+    </div>
+    <p class="caption">ECG: electrical heart signal. PPG: optical pulse signal from the watch's light sensor. PTT (pulse transit time) and PAT (pulse arrival time): how long the pulse takes to travel, which changes with blood pressure. The phone screens are illustrations with example values, not the original app.</p>
+  </section>
+
+  <div class="facts reveal" aria-label="Project facts">
+    <div class="fact"><div class="vis"><img src="hg-app-web.jpg" alt="HealthGauge app on a phone and the web dashboard on a laptop" loading="lazy" style="object-position:30% 50%"></div><div class="ft"><span>Platforms</span><b>iOS, Android, web app</b></div></div>
+    <div class="fact"><div class="vis"><svg viewBox="0 0 320 200" aria-hidden="true"><rect class="bg" width="320" height="200"/>
+<rect class="card" x="122" y="18" width="76" height="22" rx="6"/><rect class="card" x="122" y="160" width="76" height="22" rx="6"/>
+<rect x="106" y="36" width="108" height="128" rx="30" fill="var(--ink)"/>
+<rect x="116" y="46" width="88" height="108" rx="22" fill="var(--surface)"/>
+<text class="mut" x="160" y="74" text-anchor="middle" font-size="10" font-weight="600" letter-spacing="1">HR</text>
+<text class="ink" x="160" y="98" text-anchor="middle" font-size="24" font-weight="700">72</text>
+<path class="al" style="stroke-width:2.2" d="M126 128 H140 l4 -3 l3 3 H152 l3 4 l4 -18 l4 22 l3 -8 H194"/>
+<rect x="214" y="80" width="6" height="22" rx="2" fill="var(--ink)"/>
+<path class="tl" d="M238 82 a24 24 0 0 1 0 36"/><path class="tl" d="M252 72 a38 38 0 0 1 0 56"/><path class="tl" style="opacity:.5" d="M266 62 a52 52 0 0 1 0 76"/>
+<text class="mut" x="262" y="160" text-anchor="middle" font-size="10" font-weight="600" letter-spacing="1">BLUETOOTH</text>
+</svg></div><div class="ft"><span>Device</span><b>Third-party smartwatch over Bluetooth</b></div></div>
+    <div class="fact"><div class="vis"><svg viewBox="0 0 320 200" aria-hidden="true"><rect class="bg" width="320" height="200"/>
+<g class="tf"><circle cx="70" cy="78" r="16"/><path d="M42 132 a28 28 0 0 1 56 0 z"/></g>
+<g class="tf" style="opacity:.75"><circle cx="118" cy="70" r="14"/><path d="M94 120 a24 24 0 0 1 48 0 z"/></g>
+<g class="tf" style="opacity:.5"><circle cx="160" cy="80" r="13"/><path d="M138 126 a22 22 0 0 1 44 0 z"/></g>
+<rect class="card" x="196" y="46" width="96" height="104" rx="12"/>
+<path d="M232 66 h24 M236 66 v26 l-16 32 a6 6 0 0 0 5 9 h46 a6 6 0 0 0 5 -9 l-16 -32 v-26" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linejoin="round"/>
+<path d="M226 118 h52 l4 8 a5 5 0 0 1 -4 7 h-52 a5 5 0 0 1 -4 -7 z" class="asoft"/>
+<text class="mut" x="100" y="160" text-anchor="middle" font-size="10" font-weight="600" letter-spacing="1">CONSUMERS</text>
+<text class="mut" x="244" y="170" text-anchor="middle" font-size="10" font-weight="600" letter-spacing="1">RESEARCH</text>
+</svg></div><div class="ft"><span>Users</span><b>A few hundred consumers and research participants</b></div></div>
+    <div class="fact"><div class="vis"><svg viewBox="0 0 320 200" aria-hidden="true"><rect class="bg" width="320" height="200"/>
+<path class="ln" d="M160 100 L80 52 M160 100 L240 52 M160 100 L80 148 M160 100 L240 148"/>
+<g font-size="11" font-weight="600" text-anchor="middle">
+<rect class="card" x="34" y="34" width="92" height="34" rx="17"/><text class="ink" x="80" y="55">Mobile</text>
+<rect class="card" x="194" y="34" width="92" height="34" rx="17"/><text class="ink" x="240" y="55">Firmware</text>
+<rect class="card" x="34" y="132" width="92" height="34" rx="17"/><text class="ink" x="80" y="153">Cloud</text>
+<rect class="card" x="194" y="132" width="92" height="34" rx="17"/><text class="ink" x="240" y="153">Data science</text>
+</g>
+<circle cx="160" cy="100" r="30" class="soft" stroke="var(--teal)" stroke-width="2"/>
+<text class="ink" x="160" y="97" text-anchor="middle" font-size="12" font-weight="700">PM</text>
+<text class="mut" x="160" y="112" text-anchor="middle" font-size="9.5">5 to 10</text>
+</svg></div><div class="ft"><span>Team</span><b>5 to 10 engineers: mobile, firmware, cloud, data science</b></div></div>
+  </div>
+
+  <section>
+    <div class="label">The product</div>
+    <h2>What users and researchers actually used</h2>
+    <div class="gallery reveal">
+      <div class="gcard"><img src="hg-app-web.jpg" alt="HealthGauge phone measurement screen and web dashboard" width="576" height="342" loading="lazy"><h3>Measure on the phone, review on the web</h3><p>The phone shows heart rate, blood pressure and HRV with live ECG and PPG traces and a signal-quality bar during each measurement. The web dashboard shows blood pressure history, the raw signals behind each reading, heart rate trends, daily lowest resting heart rate and activity, for users and research teams.</p></div>
+      <div class="gcard tall"><img src="hg-widgets.jpg" alt="HealthGauge widget settings listing heart rate variability, resting heart rate, sleep, steps, average heart rate, body temperature and blood oxygen" width="370" height="737" loading="lazy"><h3>Users choose what matters to them</h3><p>Home-screen widgets for HRV, resting heart rate, sleep, steps, temperature, blood oxygen and more, each one switched on or off by the user.</p></div>
+    </div>
+    <p class="caption">Product images from the HealthGauge website.</p>
+  </section>
+
+  <section>
+    <div class="label">How I work</div>
+    <h2>Hands-on engineer, accountable product manager</h2>
+    <div class="duo reveal">
+      <div class="col lift"><div class="tag">Hands-on</div><div class="head"><span class="icb"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></svg></span><h3>I understand how it works under the hood</h3></div><ul>
+        <li>Electrical engineer by training, M.Sc. in Computer Science (AI). I read ECG and PPG signals and the timing features (PTT, PAT) the model used.</li>
+        <li>Worked directly with firmware, mobile, cloud and data science engineers on Bluetooth pairing, data sync and model inputs.</li>
+        <li>At Texavie I designed a sensor hub myself, from schematic and PCB layout to the enclosed product.</li>
+      </ul></div>
+      <div class="col lift"><div class="tag">Product</div><div class="head"><span class="icb red"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></span><h3>I own the outcome, not just the backlog</h3></div><ul>
+        <li>Owned MVP scope, the calibration flow, the roadmap, and pilot requirements.</li>
+        <li>Worked closely with our UI designer on screens and user flows, from first sketches to the final design.</li>
+        <li>Ran one roadmap across watch, phone, web, cloud and AI, so every release worked end to end.</li>
+        <li>Measured success with evidence partners trust: a 200-person university pilot that helped secure $2M.</li>
+      </ul></div>
+    </div>
+    <div class="stack" aria-label="Tools and platforms">
+      <span class="grp">CLOUD</span><span class="pill c"><i></i>Microsoft Azure</span><span class="pill a"><i></i>AWS</span>
+      <span class="grp" style="margin-left:10px">DELIVERY</span><span class="pill j"><i></i>Jira</span><span class="pill j"><i></i>Confluence</span>
+      <span class="grp" style="margin-left:10px">DESIGN</span><span class="pill u"><i></i>Figma, with UI designers</span>
+      <span class="grp" style="margin-left:10px">COMPLIANCE</span><span class="pill f"><i></i>HIPAA</span><span class="pill f"><i></i>PIPEDA</span>
+    </div>
+  </section>
+
+  <section>
+    <div class="label">Results</div>
+    <div class="results reveal">
+      <div class="result lift"><div class="big" data-count="90" data-pre="~" data-suf="%">~90%</div><p>Blood pressure prediction accuracy in internal testing</p><div class="bar"><b style="--w:90%"></b></div></div>
+      <div class="result lift"><div class="big" data-count="200" data-pre="~">~200</div><p>Participants in a university research pilot</p><div class="dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+      <div class="result lift"><div class="big" data-count="2" data-pre="$" data-suf="M">$2M</div><p>Funding the product and pilot results helped secure</p><div class="viz" aria-hidden="true"><svg viewBox="0 0 200 46" preserveAspectRatio="none"><path d="M0 44 L40 40 L80 34 L120 26 L160 14 L200 4 L200 46 L0 46Z" style="fill:var(--teal-soft)"/><path class="drawline" d="M0 44 L40 40 L80 34 L120 26 L160 14 L200 4" style="fill:none;stroke:var(--teal);stroke-width:2.5"/></svg></div></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="label">Where these lessons apply next</div>
+    <h2>How this maps to a connected-vehicle app</h2>
+    <p class="read">A vehicle app is a companion app for a very large device. The hard parts are the ones I worked on: an unreliable link, data people need to trust, and a cloud in the middle.</p>
+    <div class="tablewrap reveal">
+      <table>
+        <thead><tr><th>What I dealt with</th><th>The same problem in a vehicle app</th><th>What I would measure</th></tr></thead>
+        <tbody>
+          <tr><td><div class="cell"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg><span>Keeping the watch paired, especially on Android</span></div></td><td><span class="arrow">→</span>Phone as key and vehicle connection across many phone brands</td><td>Connection success rate by OS and phone model</td></tr>
+          <tr><td><div class="cell"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Sync gaps that made readings look unreliable</span></div></td><td><span class="arrow">→</span>Stale vehicle status: charge, range, lock state</td><td>Data freshness and how clearly the app shows it</td></tr>
+          <tr><td><div class="cell"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18h10a4 4 0 0 0 .5-8A6 6 0 0 0 6 9.5 4.3 4.3 0 0 0 7 18z"/></svg><span>A cloud round trip before every prediction</span></div></td><td><span class="arrow">→</span>Remote commands that travel through the cloud and wake the vehicle</td><td>Command latency and success rate</td></tr>
+          <tr><td><div class="cell"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>A weekly calibration step users had to complete</span></div></td><td><span class="arrow">→</span>Onboarding and account setup</td><td>Completion rate and time to first value</td></tr>
+          <tr><td><div class="cell"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg><span>Sensitive health data, stored in Canada, HIPAA and PIPEDA</span></div></td><td><span class="arrow">→</span>Location and vehicle data that owners expect to stay private</td><td>Permission opt-in and clear privacy controls</td></tr>
+          <tr><td><div class="cell"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg><span>One roadmap across watch, phone, web, cloud and data science</span></div></td><td><span class="arrow">→</span>Many domain teams contributing to one owner app</td><td>Consistent navigation and patterns across features</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <div class="label">My role</div>
+    <h2>Decisions I owned</h2>
+    <div class="track reveal" aria-hidden="true"><b></b></div>
+    <div class="dec reveal">
+      <div class="card lift"><span class="icb"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h10M4 17h6"/></svg></span><div class="step">STEP 01</div><h3>MVP scope</h3><p>Decided what the first version needed to prove for users and the research pilot, and what could wait.</p></div>
+      <div class="card lift"><span class="icb"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l4-5"/></svg></span><div class="step">STEP 02</div><h3>Calibration flow</h3><p>Designed with our UI designer how users calibrate against a standard cuff each week, so the model stays personal without becoming a chore.</p></div>
+      <div class="card lift"><span class="icb"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4L3 6v14l6-2 6 2 6-2V4l-6 2z"/><path d="M9 4v14M15 6v14"/></svg></span><div class="step">STEP 03</div><h3>Roadmap</h3><p>Ran one roadmap across watch integration, mobile, web, cloud and the data science model.</p></div>
+      <div class="card lift"><span class="icb"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3"/></svg></span><div class="step">STEP 04</div><h3>Pilot and partner needs</h3><p>Turned the university pilot's research requirements into product requirements the team could build and test.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="label">What I learned</div>
+    <h2>Lessons I bring to connected products</h2>
+    <div class="lessons2 reveal">
+      <div class="lesson lift"><span class="icb"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></svg></span><div><b>The connection is the product</b><p>Users judge the whole system by whether their data shows up.</p></div></div>
+      <div class="lesson lift"><span class="icb red"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 3 3h0V4z"/><path d="M15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-3 3V4z"/></svg></span><div><b>AI needs a routine around it</b><p>A simple weekly calibration step kept predictions personal and credible.</p></div></div>
+      <div class="lesson lift"><span class="icb"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><div><b>Show how fresh the data is</b><p>A clear "last synced" state builds more trust than a number with no context.</p></div></div>
+      <div class="lesson lift"><span class="icb red"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span><div><b>Privacy comes first</b><p>HIPAA, PIPEDA and storing data in Canada shaped the architecture from day one.</p></div></div>
+    </div>
+  </section>
+
+  <article class="cs" id="texavie">
+    <div class="label">Case study 02 · Hardware, firmware, AI</div>
+    <h2 style="font-size:clamp(26px,4vw,36px)">Smart glove and knee sleeve sensor hub</h2>
+    <p class="lede read">A washable smart glove and knee sleeve that track hand, finger and knee movement for rehab clinics, athletes, researchers and consumers. I led the hardware and firmware team and designed the hub that turns 32 sensor channels into data on a phone.</p>
+    <div class="who"><span><strong>Technical Product Manager, Hardware and Firmware Lead</strong></span><span>Texavie, Vancouver</span><span>Oct 2022 to Mar 2024</span><span>Team of 10 to 20</span></div>
+    <div class="txg reveal">
+      <figure><img src="tx-glove.webp" alt="Concept illustration of the smart glove: sensor hub with centered button and LEDs on the back of the hand, flexible circuits to sensors on each finger joint and the palm" width="1400" height="788" loading="lazy"><figcaption>The glove: hub on the back of the hand, sensors at the fingertips, joints and palm.</figcaption></figure>
+      <figure><img src="tx-bench.webp" alt="Concept illustration of the development bench: schematics, prototype boards, the hub with battery, the glove, the knee sleeve, live sensor data on a phone and a hand model on a laptop" width="1400" height="788" loading="lazy"><figcaption>From schematic and PCB to glove, knee sleeve, phone data and AI hand model.</figcaption></figure>
+    </div>
+    <p class="caption">Concept illustrations generated with AI from my own description of the product. They are not photos of the original hardware.</p>
+
+
+    <section style="margin-top:32px">
+      <div class="label">The hub I designed</div>
+      <h3 style="font-size:20px;margin-bottom:12px">From textile sensors to AI insight</h3>
+      <div class="flow reveal" role="img" aria-label="Glove and knee sleeve sensors connect through a flat cable to two Analog Devices SPI analog-to-digital converters, then to a Nordic nRF module with microcontroller and Bluetooth, which streams to the phone app, then the cloud, where AI models detect gestures and muscle strength. The board also has a centered power button, status LEDs, and humidity and temperature sensors.">
+        <svg viewBox="0 0 980 260" xmlns="http://www.w3.org/2000/svg">
+          <defs><marker id="ah2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="h" d="M0 0 L10 5 L0 10 z"/></marker></defs>
+          <rect class="b" x="10" y="70" width="135" height="90" rx="10"/><text class="t" x="77" y="105" text-anchor="middle">Glove and</text><text class="t" x="77" y="123" text-anchor="middle">knee sleeve</text><text class="s" x="77" y="143" text-anchor="middle">textile sensors</text>
+          <rect class="b" x="180" y="70" width="140" height="90" rx="10"/><text class="t" x="250" y="105" text-anchor="middle">2 × SPI ADCs</text><text class="s" x="250" y="125" text-anchor="middle">Analog Devices</text><text class="s" x="250" y="143" text-anchor="middle">32 channels</text>
+          <rect class="bt" x="355" y="50" width="160" height="130" rx="12"/><text class="t" x="435" y="88" text-anchor="middle">Nordic nRF module</text><text class="s" x="435" y="108" text-anchor="middle">MCU + Bluetooth LE</text><text class="s" x="435" y="126" text-anchor="middle">the brain of the hub</text><text class="m" x="435" y="160" text-anchor="middle">BUTTON + LEDS CENTERED</text>
+          <rect class="b" x="555" y="70" width="125" height="90" rx="10"/><text class="t" x="617" y="110" text-anchor="middle">Phone app</text><text class="s" x="617" y="130" text-anchor="middle">live data</text>
+          <rect class="b" x="715" y="70" width="115" height="90" rx="10"/><text class="t" x="772" y="110" text-anchor="middle">Cloud</text><text class="s" x="772" y="130" text-anchor="middle">storage, training</text>
+          <rect class="ba" x="855" y="55" width="115" height="120" rx="10"/><text class="t" x="912" y="95" text-anchor="middle">AI models</text><text class="s" x="912" y="117" text-anchor="middle">hand gestures</text><text class="s" x="912" y="135" text-anchor="middle">muscle strength</text>
+          <path class="w" d="M145 115 H178" marker-end="url(#ah2)"/><text class="m" x="150" y="62">FLAT CABLE</text>
+          <path class="w" d="M320 115 H353" marker-end="url(#ah2)"/>
+          <path class="w" d="M515 115 H553" marker-end="url(#ah2)"/><text class="m" x="517" y="102">BLE</text>
+          <path class="w" d="M680 115 H713" marker-end="url(#ah2)"/>
+          <path class="w" d="M830 115 H853" marker-end="url(#ah2)"/>
+          <rect class="b" x="355" y="200" width="160" height="46" rx="8"/><text class="s" x="435" y="219" text-anchor="middle">Humidity and temperature</text><text class="s" x="435" y="236" text-anchor="middle">sensors for protection</text>
+          <path class="w" d="M435 198 V182" marker-end="url(#ah2)"/>
+        </svg>
+      </div>
+      <p class="caption">Diagram drawn from my own design. The push button and LEDs sit in the center of the board so they line up with the enclosure.</p>
+    </section>
+
+    <section style="margin-top:36px">
+      <div class="results reveal">
+        <div class="result lift"><div class="big" data-count="5000" data-comma="1">5,000</div><p>Units in the production run, taken through stage-gate reviews from concept to pilot builds</p><div class="gates" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div><div class="vlbl"><span>Concept</span><span>Design</span><span>Verify</span><span>Pilot</span><span>Production</span></div></div>
+        <div class="result lift"><div class="big" data-count="25" data-pre="−" data-suf="%">−25%</div><p>Delivery delays, by coordinating electronics, firmware, mechanical, suppliers and manufacturing</p><div class="bar red"><b style="--w:100%"></b></div><div class="bar"><b style="--w:75%"></b></div><div class="vlbl"><span>Before</span><span>After</span></div></div>
+        <div class="result lift"><div class="big" data-count="32">32</div><p>Sensor channels streamed over Bluetooth Low Energy from one battery-powered hub</p><div class="dots" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div>
+      </div>
+    </section>
+
+    <section style="margin-top:36px">
+      <div class="duo reveal">
+        <div class="col lift"><div class="tag">Hands-on</div><div class="head"><span class="icb"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M14 7a4 4 0 0 0 5 5l-8 8a2 2 0 0 1-3-3l8-8a4 4 0 0 0-2-2z"/></svg></span><h3>What I built</h3></div><ul>
+          <li>Designed the hub from schematic and PCB layout to the final enclosed product.</li>
+          <li>Chose the architecture: a Nordic nRF module as the brain, two SPI ADCs reading 32 channels through one flat connector.</li>
+          <li>Added humidity and temperature sensing to protect the electronics in a washable wearable.</li>
+        </ul></div>
+        <div class="col lift"><div class="tag">Product</div><div class="head"><span class="icb red"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l4-5"/></svg></span><h3>The trade-offs I owned</h3></div><ul>
+          <li>Bluetooth data rate against battery life: enough data for the AI models, enough battery for a full session.</li>
+          <li>Manufacturing and suppliers: moving from prototypes to a 5,000-unit run through part lead times and pilot builds.</li>
+          <li>One product for four audiences: rehab clinics, athletes, researchers and consumers.</li>
+        </ul></div>
+      </div>
+    </section>
+
+    <section style="margin-top:36px" class="read">
+      <div class="label">In the news</div>
+      <p>The smart glove from the UBC and Texavie team was published in <em>Nature Machine Intelligence</em>. Its machine learning models predicted finger and wrist joint angles with at least 99% accuracy, matching camera-based motion capture, and it was tested with stroke survivors in rehabilitation.</p>
+      <div class="press">
+        <a href="https://engineering.ubc.ca/news/2024/smart-glove-can-boost-hand-mobility-of-stroke-patients">UBC Engineering: smart glove for stroke patients</a>
+        <a href="https://www.eurekalert.org/news-releases/1031283">EurekAlert news release</a>
+      </div>
+    </section>
+  </article>
+
+  <article class="cs" id="mfl">
+    <div class="label">Case study 03 · AI agents, healthcare operations</div>
+    <h2 style="font-size:clamp(26px,4vw,36px)">AI agents that run a fertility clinic's patient flow</h2>
+    <p class="lede read">My Fertility Labs offers fertility care in person and online, with doctors, nurse practitioners, pharmacists, nutritionists and coaches. I led AI and mobile product: agents that take a patient from intake to the right clinician, through lab work, and back, with a clinician always reviewing.</p>
+    <div class="who"><span><strong>Senior Technical Product Manager, AI and Mobile</strong></span><span>My Fertility Labs, Alberta</span><span>Apr 2024 to 2026</span><span>Team of 5 to 10</span></div>
+
+    <section style="margin-top:32px">
+      <div class="label">The agent workflow</div>
+      <h3 style="font-size:20px;margin-bottom:12px">Every handoff that used to be manual</h3>
+      <div class="flow reveal" role="img" aria-label="Patient submits intake form, AI agent processes it and routes the patient to the right clinician, agent sends follow-ups, agent sends lab requisitions and images to the lab, results come back, AI analyzes and summarizes them, clinician reviews and decides.">
+        <svg viewBox="0 0 980 240" xmlns="http://www.w3.org/2000/svg">
+          <defs><marker id="ah3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="h" d="M0 0 L10 5 L0 10 z"/></marker></defs>
+          <rect class="b" x="10" y="30" width="130" height="78" rx="10"/><text class="t" x="75" y="62" text-anchor="middle">Intake form</text><text class="s" x="75" y="82" text-anchor="middle">patient app</text>
+          <rect class="ba" x="175" y="30" width="150" height="78" rx="10"/><text class="t" x="250" y="62" text-anchor="middle">AI agent</text><text class="s" x="250" y="82" text-anchor="middle">reads and processes</text>
+          <rect class="b" x="360" y="30" width="150" height="78" rx="10"/><text class="t" x="435" y="62" text-anchor="middle">Right clinician</text><text class="s" x="435" y="82" text-anchor="middle">routing</text>
+          <rect class="b" x="545" y="30" width="130" height="78" rx="10"/><text class="t" x="610" y="62" text-anchor="middle">Follow-ups</text><text class="s" x="610" y="82" text-anchor="middle">reminders, next steps</text>
+          <rect class="b" x="710" y="30" width="130" height="78" rx="10"/><text class="t" x="775" y="62" text-anchor="middle">Lab center</text><text class="s" x="775" y="82" text-anchor="middle">requisitions, images</text>
+          <rect class="ba" x="710" y="145" width="130" height="78" rx="10"/><text class="t" x="775" y="177" text-anchor="middle">AI analysis</text><text class="s" x="775" y="197" text-anchor="middle">results summarized</text>
+          <rect class="bt" x="465" y="145" width="180" height="78" rx="10"/><text class="t" x="555" y="177" text-anchor="middle">Clinician review</text><text class="s" x="555" y="197" text-anchor="middle">human in the loop</text>
+          <path class="w" d="M140 69 H173" marker-end="url(#ah3)"/>
+          <path class="w" d="M325 69 H358" marker-end="url(#ah3)"/>
+          <path class="w" d="M510 69 H543" marker-end="url(#ah3)"/>
+          <path class="w" d="M675 69 H708" marker-end="url(#ah3)"/>
+          <path class="w" d="M775 108 V143" marker-end="url(#ah3)"/><text class="m" x="785" y="131">RESULTS BACK</text>
+          <path class="w" d="M710 184 H647" marker-end="url(#ah3)"/>
+          <path id="agentpath" d="M75 69 H775 V184 H555" fill="none" stroke="none"/>
+          <circle class="agentdot" r="6"><animateMotion dur="7s" repeatCount="indefinite"><mpath href="#agentpath"/></animateMotion></circle>
+        </svg>
+      </div>
+      <p class="caption">Agents built with Microsoft Copilot alongside our LLM and RAG (AI that answers from the clinic's own documents) features. Diagram drawn from my own description of the system.</p>
+    </section>
+
+    <section style="margin-top:36px">
+      <div class="results reveal">
+        <div class="result lift"><div class="big" data-count="10" data-suf=" wks">10 wks</div><p>From idea to a live AI intake and document automation MVP</p><div class="wk" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="vlbl"><span>Week 1</span><span>Live</span></div></div>
+        <div class="result lift"><div class="big" data-count="40" data-pre="−" data-suf="%">−40%</div><p>Manual triage time for clinic staff</p><div class="bar red"><b style="--w:100%"></b></div><div class="bar"><b style="--w:60%"></b></div><div class="vlbl"><span>Before</span><span>After</span></div></div>
+        <div class="result lift"><div class="big">31 → <span data-count="47" data-from="31">47</span></div><p>Net Promoter Score after launch</p><div class="viz" aria-hidden="true" style="height:56px"><svg viewBox="0 0 120 64"><path class="arc" d="M10 58 A50 50 0 0 1 110 58"/><path class="arcv nps" d="M10 58 A50 50 0 0 1 110 58" pathLength="200" style="stroke-dasharray:200;stroke-dashoffset:53"/></svg></div></div>
+      </div>
+    </section>
+
+    <section style="margin-top:36px">
+      <div class="duo reveal">
+        <div class="col lift"><div class="tag">Hands-on</div><div class="head"><span class="icb"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 3 3h0V4z"/><path d="M15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-3 3V4z"/></svg></span><h3>What I built</h3></div><ul>
+          <li>Built AI agents with Microsoft Copilot for intake, routing, follow-ups and lab results.</li>
+          <li>Owned LLM, RAG and agent features in the iOS and Android patient app and the clinic platform.</li>
+          <li>Worked on EMR (electronic medical record) integrations so agents fit the clinics' existing systems.</li>
+          <li>Worked with our UI designer on the patient app and clinic screens, so AI suggestions were clear and easy to review.</li>
+        </ul></div>
+        <div class="col lift"><div class="tag">Product</div><div class="head"><span class="icb red"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg></span><h3>The hard parts</h3></div><ul>
+          <li>Trust: clinicians review every clinical decision, so the AI speeds work up without taking control.</li>
+          <li>Privacy: sensitive health data under HIPAA and PIPEDA, with compliance involved from the first design.</li>
+          <li>Adoption: four user groups (patients, clinicians, clinic staff and lab partners) across several clinic locations.</li>
+        </ul></div>
+      </div>
+      <div class="stack"><span class="grp">BUILT WITH</span><span class="pill c"><i></i>Microsoft Copilot</span><span class="pill c"><i></i>Microsoft Azure</span><span class="pill f"><i></i>HIPAA</span><span class="pill f"><i></i>PIPEDA</span></div>
+    </section>
+
+    <section style="margin-top:36px" class="read">
+      <div class="label">Public record</div>
+      <p>My Fertility Labs was a 2025 Women in Innovation finalist at the ASTech Awards, which list me as the company's tech lead for AI and mobile.</p>
+      <div class="press"><a href="https://astech.ca/archives/indexofpastwinners/my-fertility-labs">ASTech Awards: My Fertility Labs</a></div>
+    </section>
+  </article>
+
+  <footer id="contact">
+    <h2 style="font-size:20px;color:var(--ink);margin-bottom:8px">Let's talk</h2>Amir Pournajib, PMP · North Vancouver, BC<br>Email: pournajib.a@gmail.com · <a href="https://www.linkedin.com/in/amir-pournajib">linkedin.com/in/amir-pournajib</a><br><br>
+    Product images are from the HealthGauge website. Texavie images are AI concept illustrations from my own description. Texavie and My Fertility Labs diagrams are my own. The animation and the phone screens in the walkthrough are my own illustration of how the system worked, with example values. No company or user data is shown.
+  </footer>
+</div>
+
+<script>
+(function(){
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var ecg = '<svg class="ecg" viewBox="0 0 220 60" aria-hidden="true"><path d="M0 34 H30 l6 -4 l5 4 H70 l5 5 l7 -28 l7 34 l5 -11 H120 l9 -6 l9 6 H150 l6 -4 l5 4 H175 l5 5 l7 -28 l7 34 l5 -11 H220"/></svg>';
+  var spark = '<svg class="spark" viewBox="0 0 200 50" aria-hidden="true"><path class="area" d="M0 30 L28 26 L56 32 L84 24 L112 28 L140 20 L168 24 L200 18 V50 H0 Z"/><path d="M0 30 L28 26 L56 32 L84 24 L112 28 L140 20 L168 24 L200 18"/></svg>';
+  var steps = [
+    {t:'Profile and onboarding', b:'Users set up a profile in the app or web app: age, gender, skin tone, height and weight. The model uses these to personalize each estimate, since optical pulse signals vary between people.', w:'Onboarding is where trust starts. A clear setup flow decided whether people reached their first reading.', nodes:['phone'], link:null,
+     s:'<div class="bar"><span>Setup</span><span class="chip">Step 1 of 3</span></div><div class="scard"><h4>Your profile</h4><div class="row"><span>Age</span><span>42</span></div><div class="row"><span>Gender</span><span>Male</span></div><div class="row"><span>Skin tone</span><span>Type IV</span></div><div class="row"><span>Height</span><span>178 cm</span></div><div class="row"><span>Weight</span><span>80 kg</span></div></div><div class="btnfake">Continue</div><div class="note">Illustration with example values</div>'},
+    {t:'Weekly calibration with a real cuff', b:'Once a week, users took a reading with a standard cuff. That reading anchored the AI model to the person, so its estimates stayed accurate for them.', w:'I designed this flow to be quick enough that people kept doing it. A step users skip is a model that drifts.', nodes:['cuff','phone'], link:'l-cw',
+     s:'<div class="bar"><span>Calibration</span><span class="chip">Weekly</span></div><div class="scard"><h4>Take a cuff reading</h4><p style="margin:0 0 8px;color:var(--muted);font-size:12.5px">Sit still for one minute, then enter your cuff result.</p><div class="row"><span>Systolic</span><span>122</span></div><div class="row"><span>Diastolic</span><span>80</span></div></div><div class="btnfake">Save calibration</div><div class="note">Illustration with example values</div>'},
+    {t:'The watch records heart signals', b:'The watch captured ECG and PPG together. The time between the heartbeat and the pulse arriving at the wrist changes with blood pressure.', w:'The device is only half the product. The app has to make a measurement feel simple and reliable.', nodes:['watch'], link:null,
+     s:'<div class="bar"><span>Measuring</span><span class="chip">Watch</span></div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px"><div class="scard" style="padding:8px;text-align:center"><span style="font-size:10px;color:var(--muted)">HR</span><div style="font:700 18px var(--display)">72</div></div><div class="scard" style="padding:8px;text-align:center"><span style="font-size:10px;color:var(--muted)">BP</span><div style="font:700 13px var(--display);line-height:1.4">118/76</div></div><div class="scard" style="padding:8px;text-align:center"><span style="font-size:10px;color:var(--muted)">HRV</span><div style="font:700 18px var(--display)">41</div></div></div><div class="scard" style="padding:8px"><span style="font-size:11px;color:var(--muted)">ECG</span>'+ecg+'</div><div class="scard" style="padding:8px"><span style="font-size:11px;color:var(--muted)">PPG</span><svg class="ecg" viewBox="0 0 220 60" aria-hidden="true"><path style="stroke:#6B4FD8" d="M0 40 C15 40 18 14 30 14 C42 14 44 36 55 36 C62 36 64 30 70 30 C80 30 84 40 95 40 C110 40 113 14 125 14 C137 14 139 36 150 36 C157 36 159 30 165 30 C175 30 179 40 190 40 C205 40 208 14 220 14"/></svg></div><div class="row" style="border:0"><span>Signal quality</span><span style="color:var(--teal);font-weight:600">Good</span></div><div class="note">Illustration in the style of the real app, example values</div>'},
+    {t:'Bluetooth sync to the phone', b:'The phone app pulled the recording from the watch over Bluetooth. Keeping the watch paired was the hardest reliability problem, especially on Android, where many phones close background apps to save battery.', w:'Every dropped connection is a gap the user sees. Try "Simulate a dropped connection" to see why reliability is a product problem.', nodes:['watch','phone'], link:'l-wp',
+     s:'<div class="bar"><span>Watch</span><span class="chip" id="conn">Connected</span></div><div class="scard"><h4 id="synct">Syncing data</h4><div class="row"><span>Last synced</span><span id="lastsync">Just now</span></div><div class="row"><span>Recordings</span><span>3 new</span></div></div><div class="note">Illustration</div>'},
+    {t:'Cloud AI predicts blood pressure', b:'The phone sent the signals securely to the cloud, where the model used timing features (PTT and PAT) plus the user\'s calibration to estimate blood pressure. Data was stored in Canada, built for HIPAA and PIPEDA.', w:'A cloud round trip adds waiting time. The app has to show progress so people trust the result when it arrives.', nodes:['phone','cloud'], link:'l-pc',
+     s:'<div class="bar"><span>Analyzing</span><span class="chip">Secure</span></div><div class="scard" style="text-align:center"><h4>Estimating with AI</h4><div class="spin"></div><p style="margin:0;color:var(--muted);font-size:12.5px">Using your calibration from this week</p></div><div class="note">Illustration</div>'},
+    {t:'The result, with context', b:'The estimate came back to the app and web app with a trend over time, so users and researchers saw patterns instead of single numbers.', w:'One number means little. A trend with a clear "last updated" time is what people act on.', nodes:['cloud','phone'], link:'l-cp',
+     s:'<div class="bar"><span>Today</span><span class="chip">Updated 2 min ago</span></div><div class="scard"><h4>Blood pressure</h4><div class="bp">118<small> / 76 mmHg</small></div></div><div class="scard"><h4>This week</h4>'+spark+'</div><div class="note">Illustration with example values</div>'}
+  ];
+  var i = 0, playing = !reduce, dropped = false, timer = null, t0 = performance.now();
+  var btns = Array.prototype.slice.call(document.querySelectorAll('.steps button'));
+  var nodes = {cuff:'n-cuff', watch:'n-watch', phone:'n-phone', cloud:'n-cloud'};
+  var links = ['l-cw','l-wp','l-pc','l-cp'];
+  var pk = [document.getElementById('p1'),document.getElementById('p2'),document.getElementById('p3')];
+  var playBtn = document.getElementById('play'), dropBtn = document.getElementById('drop');
+
+  function show(n){
+    i = n; var s = steps[n];
+    document.getElementById('st-title').textContent = (n+1)+'. '+s.t;
+    document.getElementById('st-body').textContent = s.b;
+    document.getElementById('st-why').textContent = s.w;
+    document.getElementById('screen').innerHTML = s.s;
+    btns.forEach(function(b,k){ b.setAttribute('aria-pressed', k===n ? 'true':'false'); });
+    Object.keys(nodes).forEach(function(k){ document.getElementById(nodes[k]).classList.toggle('on', s.nodes.indexOf(k) > -1); });
+    links.forEach(function(l){ var el=document.getElementById(l); el.classList.toggle('on', l===s.link); el.classList.remove('down'); });
+    pk.forEach(function(p){ p.classList.toggle('ai', s.link==='l-cp'); });
+    dropped = false; dropBtn.textContent = 'Simulate a dropped connection';
+    if (reduce) placeStatic();
+  }
+  function placeStatic(){
+    var s = steps[i]; pk.forEach(function(p,k){
+      if(!s.link){ p.style.opacity=0; return; }
+      var path=document.getElementById(s.link), L=path.getTotalLength(), pt=path.getPointAtLength(L*(0.25+0.25*k));
+      p.setAttribute('cx',pt.x); p.setAttribute('cy',pt.y); p.style.opacity=1;
+    });
+  }
+  function frame(now){
+    var s = steps[i];
+    if (s.link && !reduce){
+      var path=document.getElementById(s.link), L=path.getTotalLength();
+      pk.forEach(function(p,k){
+        var f = ((now - t0)/1400 + k/3) % 1;
+        if (dropped && s.link==='l-wp' && f > 0.45){ p.style.opacity = 0; return; }
+        var pt = path.getPointAtLength(L*f);
+        p.setAttribute('cx',pt.x); p.setAttribute('cy',pt.y); p.style.opacity = 1;
+      });
+    } else if (!s.link){ pk.forEach(function(p){ p.style.opacity=0; }); }
+    requestAnimationFrame(frame);
+  }
+  function schedule(){
+    clearInterval(timer);
+    if (playing) timer = setInterval(function(){ if(!dropped) show((i+1)%steps.length); }, 5200);
+    playBtn.textContent = playing ? 'Pause' : 'Play';
+  }
+  btns.forEach(function(b){ b.addEventListener('click', function(){ show(+b.dataset.i); playing=false; schedule(); }); });
+  playBtn.addEventListener('click', function(){ playing=!playing; schedule(); });
+  dropBtn.addEventListener('click', function(){
+    if (i !== 3){ show(3); }
+    playing=false; schedule();
+    dropped = !dropped;
+    var link=document.getElementById('l-wp'), c=document.getElementById('conn'), st=document.getElementById('synct'), ls=document.getElementById('lastsync');
+    link.classList.toggle('down', dropped); link.classList.toggle('on', !dropped);
+    if (c){ c.textContent = dropped ? 'Reconnecting' : 'Connected'; c.classList.toggle('warn', dropped); }
+    if (st) st.textContent = dropped ? 'Sync paused' : 'Syncing data';
+    if (ls) ls.textContent = dropped ? '3 hours ago' : 'Just now';
+    dropBtn.textContent = dropped ? 'Restore the connection' : 'Simulate a dropped connection';
+    if (reduce) placeStatic();
+  });
+  show(0); schedule();
+  if (!reduce) requestAnimationFrame(frame);
+})();
+</script>
+<script>
+(function(){
+  document.documentElement.classList.add('js');
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var els=[].slice.call(document.querySelectorAll('.reveal'));
+  function fmt(v,el){ var n=Math.round(v); if(el.dataset.comma) n=n.toLocaleString('en-US'); return (el.dataset.pre||'')+n+(el.dataset.suf||''); }
+  function count(root){
+    [].slice.call(root.querySelectorAll('[data-count]')).forEach(function(el){
+      if(reduce||el.dataset.done) return; el.dataset.done=1;
+      var to=+el.dataset.count, from=+(el.dataset.from||0), t0=null, d=1300;
+      function step(t){ if(!t0)t0=t; var p=Math.min(1,(t-t0)/d), e=1-Math.pow(1-p,3); el.textContent=fmt(from+(to-from)*e,el); if(p<1) requestAnimationFrame(step); }
+      requestAnimationFrame(step);
+    });
+    [].slice.call(root.querySelectorAll('.nps')).forEach(function(a){ if(reduce) return; a.style.transition='none'; a.style.strokeDashoffset=69; a.getBoundingClientRect(); requestAnimationFrame(function(){ a.style.transition=''; a.style.strokeDashoffset=53; }); });
+    [].slice.call(root.querySelectorAll('.dots i,.gates span,.wk span')).forEach(function(d,i){ d.style.transitionDelay=(i*35)+'ms'; });
+  }
+  if('IntersectionObserver' in window && !reduce){
+    var vh=window.innerHeight;
+    els.forEach(function(el){ if(el.getBoundingClientRect().top>vh*0.9) el.classList.add('pre'); });
+    var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.remove('pre'); count(e.target); io.unobserve(e.target);} }); },{threshold:0.18});
+    els.forEach(function(el){ io.observe(el); });
+  }
+  // remote command demo
+  var st=document.querySelectorAll('#cmdsteps div'), note=document.getElementById('cmdnote'), bar=document.getElementById('cmdbar');
+  if(st.length){
+    var seq=[[0,'Sent to vehicle',20],[1,'Waking vehicle... still trying, 5 s',60],[2,'Unlocked in 8 s',100]], k=0;
+    function tick(){ st.forEach(function(d,i){ d.className = i<seq[k][0]?'on':(i===seq[k][0]?(k===1?'wait':'on'):''); }); note.textContent=seq[k][1]; bar.style.setProperty('--w',seq[k][2]+'%'); k=(k+1)%seq.length; }
+    tick(); if(!reduce) setInterval(tick,1800);
+  }
+})();
+</script>
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('.topnav a.m'));
+  var map={}; links.forEach(function(a){ map[a.getAttribute('href').slice(1)]=a; });
+  var ids=Object.keys(map), current=null;
+  function setActive(id){ if(id===current) return; current=id; links.forEach(function(a){ a.classList.toggle('active', a===map[id]); if(a===map[id]){ a.setAttribute('aria-current','true'); try{ a.scrollIntoView({block:'nearest',inline:'nearest'}); }catch(e){} } else a.removeAttribute('aria-current'); }); }
+  function onScroll(){
+    var y=window.scrollY+120, best=null;
+    var bestTop=-1;
+    ids.forEach(function(id){ var el=document.getElementById(id); if(!el) return; var t=el.getBoundingClientRect().top+window.scrollY; if(t<=y && t>bestTop){ bestTop=t; best=id; } });
+    if((window.innerHeight+window.scrollY)>=document.body.scrollHeight-4) best='contact';
+    setActive(best);
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+})();
+</script>
+</body>
+</html>

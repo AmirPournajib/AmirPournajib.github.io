@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Amir Pournajib for RV Tech</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+.topnav a.x{display:block; white-space:nowrap; font:600 14px var(--body); color:var(--accent); text-decoration:none; padding:8px 12px; border-radius:8px}
+.topnav a.x:hover{background:var(--surface)}
+/* Layout: hero, then an interactive system walkthrough (pipeline + phone), then results, a connected-vehicle lens table, decisions, lessons. Clinical ink with ECG-red signal and teal data flow. */
+:root{
+  --bg:#F3F5F7; --surface:#FFFFFF; --ink:#14273A; --muted:#566A7C; --line:#D6DDE4;
+  --accent:#C8403A; --accent-soft:#F7E3E1; --teal:#1F6F78; --teal-soft:#DDEFF0; --warn:#B7791F;
+  --display:"Sora","Segoe UI",system-ui,sans-serif;
+  --body:"IBM Plex Sans","Segoe UI",system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0D1721; --surface:#15222E; --ink:#E6EDF3; --muted:#9BABBB; --line:#2A3A49;
+    --accent:#F0716A; --accent-soft:#3A2224; --teal:#5FB7BF; --teal-soft:#16353A; --warn:#E3A84A; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0D1721; --surface:#15222E; --ink:#E6EDF3; --muted:#9BABBB; --line:#2A3A49;
+  --accent:#F0716A; --accent-soft:#3A2224; --teal:#5FB7BF; --teal-soft:#16353A; --warn:#E3A84A; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg); color:var(--ink); font-family:var(--body); font-size:17px; line-height:1.6}
+.wrap{max-width:1100px; margin:0 auto; padding:40px 20px 72px}
+.read{max-width:68ch}
+h1,h2,h3{font-family:var(--display); text-wrap:balance; margin:0; line-height:1.2}
+h1{font-size:clamp(28px,4.8vw,44px); font-weight:700}
+h2{font-size:24px; font-weight:600; margin-bottom:14px}
+h3{font-size:17px; font-weight:600; margin-bottom:6px}
+p{margin:0 0 14px}
+.label{font-family:var(--mono); font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin-bottom:10px}
+.lede{font-size:19px; color:var(--muted); margin-top:14px}
+.who{display:flex; flex-wrap:wrap; gap:6px 18px; color:var(--muted); font-size:15px; margin:18px 0 0}
+.who strong{color:var(--ink); font-weight:600}
+section{margin-top:56px}
+.trace{display:block; width:100%; max-width:360px; height:34px; margin:18px 0 4px}
+.trace path{fill:none; stroke:var(--accent); stroke-width:2; stroke-dasharray:520; stroke-dashoffset:0}
+@media (prefers-reduced-motion:no-preference){ .trace path{animation:draw 3.2s ease-in-out infinite} }
+@keyframes draw{0%{stroke-dashoffset:520}55%{stroke-dashoffset:0}100%{stroke-dashoffset:0}}
+
+/* Walkthrough */
+.stage{display:grid; grid-template-columns:minmax(0,1fr) 270px; gap:22px; background:var(--surface); border:1px solid var(--line); border-radius:16px; padding:22px}
+@media (max-width:860px){ .stage{grid-template-columns:1fr} .phone{margin:0 auto} }
+.pipe{overflow-x:auto}
+.pipe svg{display:block; width:100%; min-width:560px; height:auto}
+.node rect{fill:var(--bg); stroke:var(--line); stroke-width:1.5; transition:fill .3s, stroke .3s}
+.node.on rect{fill:var(--teal-soft); stroke:var(--teal)}
+.node.ai.on rect{fill:var(--accent-soft); stroke:var(--accent)}
+.node text{fill:var(--ink); font-family:var(--body); font-size:14px; font-weight:600}
+.node .sub{fill:var(--muted); font-size:11.5px; font-weight:400}
+.link{stroke:var(--line); stroke-width:2.5; fill:none; transition:stroke .3s}
+.link.on{stroke:var(--teal)}
+.link.down{stroke:var(--warn); stroke-dasharray:6 6}
+.pkt{fill:var(--teal); opacity:0}
+.pkt.ai{fill:var(--accent)}
+.linklabel{fill:var(--muted); font-family:var(--mono); font-size:10.5px}
+.steps{display:flex; flex-wrap:wrap; gap:8px; margin:18px 0 14px}
+.steps button{font:500 13px var(--body); color:var(--muted); background:var(--bg); border:1px solid var(--line); border-radius:999px; padding:7px 12px; cursor:pointer}
+.steps button[aria-pressed="true"]{color:var(--surface); background:var(--teal); border-color:var(--teal)}
+.steps button:focus-visible,.ctrl button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.explain h3{font-size:19px}
+.explain p{color:var(--muted); margin:0}
+.explain .why{margin-top:10px; font-size:15px; color:var(--ink); border-left:3px solid var(--accent); padding-left:12px}
+.ctrl{display:flex; flex-wrap:wrap; gap:10px; margin-top:16px}
+.ctrl button{font:600 14px var(--body); border-radius:8px; padding:9px 14px; cursor:pointer; border:1px solid var(--teal); background:var(--teal); color:var(--surface)}
+.ctrl button.ghost{background:transparent; color:var(--teal)}
+
+/* Phone mockup */
+.phone{width:250px; height:500px; border-radius:36px; border:9px solid var(--ink); background:var(--bg); position:relative; overflow:hidden; box-shadow:0 18px 40px rgba(20,39,58,.18)}
+.phone:before{content:""; position:absolute; top:8px; left:50%; transform:translateX(-50%); width:70px; height:18px; border-radius:10px; background:var(--ink)}
+.screen{position:absolute; inset:38px 14px 16px; display:flex; flex-direction:column; gap:10px; font-size:13px}
+.bar{display:flex; justify-content:space-between; align-items:center; font-size:11.5px; color:var(--muted)}
+.chip{font:600 11px var(--body); padding:3px 8px; border-radius:999px; background:var(--teal-soft); color:var(--teal)}
+.chip.warn{background:var(--accent-soft); color:var(--warn)}
+.scard{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px}
+.scard h4{margin:0 0 6px; font:600 14px var(--display)}
+.row{display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px solid var(--line); font-size:12.5px}
+.row:last-child{border-bottom:0}
+.row span:first-child{color:var(--muted)}
+.bp{font:700 34px var(--display); font-variant-numeric:tabular-nums; line-height:1.1}
+.bp small{font:500 13px var(--body); color:var(--muted)}
+.ecg{width:100%; height:60px}
+.ecg path{fill:none; stroke:var(--accent); stroke-width:2}
+.spark path{fill:none; stroke:var(--teal); stroke-width:2}
+.spark .area{fill:var(--teal-soft); stroke:none}
+.note{font-size:10.5px; color:var(--muted); text-align:center; margin-top:auto}
+.btnfake{background:var(--teal); color:var(--surface); text-align:center; border-radius:10px; padding:9px; font-weight:600; font-size:13px}
+.spin{width:28px; height:28px; border-radius:50%; border:3px solid var(--line); border-top-color:var(--accent); margin:8px auto}
+@media (prefers-reduced-motion:no-preference){ .spin{animation:rot 1s linear infinite} }
+@keyframes rot{to{transform:rotate(360deg)}}
+
+/* Hero and product gallery */
+.hero{display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); gap:32px; align-items:center}
+@media (max-width:860px){ .hero{grid-template-columns:1fr} }
+.shot{margin:0; background:#1A63C9; border-radius:16px; overflow:hidden; border:1px solid var(--line)}
+.shot img{display:block; width:100%; height:auto}
+.gallery{display:grid; grid-template-columns:minmax(0,1.6fr) minmax(0,1fr); gap:18px; align-items:start}
+@media (max-width:760px){ .gallery{grid-template-columns:1fr} }
+.gcard{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:16px}
+.gcard img{display:block; width:100%; height:auto; border-radius:10px}
+.gcard.tall img{max-height:520px; object-fit:cover; object-position:top}
+.gcard h3{margin-top:14px}
+.gcard p{margin:0; color:var(--muted); font-size:15px}
+.duo{display:grid; grid-template-columns:repeat(2,1fr); gap:18px}
+@media (max-width:760px){ .duo{grid-template-columns:1fr} }
+.col{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:20px}
+.col h3{font-size:19px; margin-bottom:12px}
+.col ul{margin:0; padding-left:18px}
+.col li{margin-bottom:9px; font-size:15.5px}
+.col .tag{font:600 11px var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--teal); margin-bottom:8px}
+.more{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px}
+.more .card h3{font-size:18px}
+.more .meta{font:500 12px var(--mono); color:var(--muted); margin-bottom:8px; letter-spacing:.04em}
+/* Additional case studies */
+.cs{margin-top:88px; padding-top:40px; border-top:2px solid var(--line)}
+.flow{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:18px; overflow-x:auto}
+.flow svg{display:block; width:100%; min-width:820px; height:auto}
+.flow .b{fill:var(--bg); stroke:var(--line); stroke-width:1.5}
+.flow .bt{fill:var(--teal-soft); stroke:var(--teal); stroke-width:1.5}
+.flow .ba{fill:var(--accent-soft); stroke:var(--accent); stroke-width:1.5}
+.flow .t{fill:var(--ink); font:600 14px var(--body)}
+.flow .s{fill:var(--muted); font:400 12px var(--body)}
+.flow .m{fill:var(--muted); font:500 10.5px var(--mono); letter-spacing:.05em}
+.flow .w{stroke:var(--teal); stroke-width:2.5; fill:none; stroke-dasharray:7 7}
+.flow .h{fill:var(--teal)}
+@media (prefers-reduced-motion:no-preference){ .flow .w{animation:flowdash 1.2s linear infinite} }
+@keyframes flowdash{to{stroke-dashoffset:-14}}
+.press{display:flex; flex-wrap:wrap; gap:10px; margin-top:14px}
+.press a{font-size:14px; background:var(--surface); border:1px solid var(--line); border-radius:999px; padding:7px 13px; text-decoration:none}
+.press a:hover{border-color:var(--teal)}
+.toc{display:flex; flex-wrap:wrap; gap:10px; margin-top:22px}
+.toc a{font:600 14px var(--body); text-decoration:none; color:var(--ink); background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:10px 14px}
+.toc a span{display:block; font:500 11px var(--mono); color:var(--accent); letter-spacing:.06em}
+/* Rivian fit and critique */
+.fit{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:12px}
+.fitc{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:16px 18px; display:grid; gap:6px}
+.fitc .ask{font:600 12px var(--mono); letter-spacing:.05em; text-transform:uppercase; color:var(--muted)}
+.fitc .proof{font-size:15.5px}
+.fitc .proof b{color:var(--teal)}
+.intro{background:var(--ink); color:var(--bg); border-radius:16px; padding:24px 26px; margin-top:28px}
+.intro p{margin:0; font-size:17px; max-width:75ch}
+.intro .label{color:var(--accent)}
+.crit{display:grid; grid-template-columns:repeat(2,1fr); gap:14px}
+@media (max-width:760px){ .crit{grid-template-columns:1fr} }
+.crit .card ul{margin:8px 0 0; padding-left:18px; color:var(--muted); font-size:15px}
+.idea{background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--teal); border-radius:12px; padding:18px 20px}
+.idea h3{font-size:18px}
+.idea p{margin:6px 0 0; color:var(--muted); font-size:15.5px}
+.idea .metric{margin-top:10px; font:500 13px var(--mono); color:var(--teal)}
+.idea .from{margin-top:6px; font-size:14px; color:var(--ink)}
+.ideas{display:grid; gap:12px}
+.txg{display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-top:26px}
+@media (max-width:760px){ .txg{grid-template-columns:1fr} }
+.txg figure{margin:0; background:var(--surface); border:1px solid var(--line); border-radius:12px; overflow:hidden}
+.txg img{display:block; width:100%; height:auto}
+.txg figcaption{padding:10px 14px; font-size:13.5px; color:var(--muted)}
+/* Sticky menu */
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){ html{scroll-behavior:auto} }
+[id]{scroll-margin-top:76px}
+.topnav{position:sticky; top:0; z-index:20; background:color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); border-bottom:1px solid var(--line)}
+.topnav .in{max-width:1100px; margin:0 auto; padding:10px 20px; display:flex; align-items:center; gap:18px}
+.topnav .brand{font:700 15px var(--display); color:var(--ink); text-decoration:none; white-space:nowrap}
+.topnav .brand span{color:var(--accent)}
+.topnav ul{list-style:none; margin:0 0 0 auto; padding:0; display:flex; gap:4px; overflow-x:auto; scrollbar-width:none}
+.topnav ul::-webkit-scrollbar{display:none}
+.topnav a.m{display:block; white-space:nowrap; font:500 14px var(--body); color:var(--muted); text-decoration:none; padding:8px 12px; border-radius:8px; transition:background .2s,color .2s}
+.topnav a.m:hover{background:var(--surface); color:var(--ink)}
+.topnav a.m.active{background:var(--teal); color:var(--surface)}
+.topnav a:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+@media (max-width:760px){ .topnav .in{flex-direction:column; align-items:stretch; gap:6px; padding:8px 12px} .topnav ul{margin:0} .topnav .brand{display:none} }
+/* Fit cards with visuals */
+.fit{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:20px}
+@media (max-width:900px){ .fit{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:560px){ .fit{grid-template-columns:1fr} }
+.fitc{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:0; overflow:hidden; display:flex; flex-direction:column; gap:0; transition:transform .2s, box-shadow .2s}
+.fitc:hover{transform:translateY(-2px); box-shadow:0 10px 26px rgba(20,39,58,.10)}
+@media (prefers-reduced-motion:reduce){ .fitc,.fitc:hover{transition:none; transform:none} }
+.fitc .vis{aspect-ratio:16/10; background:var(--bg); border-bottom:1px solid var(--line); overflow:hidden}
+.fitc .vis img{width:100%; height:100%; object-fit:cover; display:block}
+.fitc .vis svg{width:100%; height:100%; display:block}
+.fitc .txt{padding:16px 18px 18px; display:grid; gap:8px}
+.fitc .ask{font:600 16px var(--display); color:var(--ink); letter-spacing:0; text-transform:none; line-height:1.3}
+.fitc .proof{font-size:15px; color:var(--muted)}
+.fitc .proof b{color:var(--teal); font-weight:600}
+.vis .bg{fill:var(--bg)} .vis .card{fill:var(--surface); stroke:var(--line)} .vis .ink{fill:var(--ink)} .vis .mut{fill:var(--muted)}
+.vis .tl{stroke:var(--teal); fill:none; stroke-width:3; stroke-linecap:round} .vis .tf{fill:var(--teal)} .vis .af{fill:var(--accent)} .vis .al{stroke:var(--accent); fill:none; stroke-width:3; stroke-linecap:round}
+.vis .soft{fill:var(--teal-soft)} .vis .asoft{fill:var(--accent-soft)} .vis .ln{stroke:var(--line); stroke-width:2; fill:none}
+.vis text{font-family:var(--body)}
+/* Fact cards with visuals */
+.facts{grid-template-columns:repeat(4,minmax(0,1fr)); gap:18px}
+@media (max-width:900px){ .facts{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:480px){ .facts{grid-template-columns:1fr} }
+.facts .fact{padding:0; overflow:hidden; display:flex; flex-direction:column}
+.fact .vis{aspect-ratio:16/10; background:var(--bg); border-bottom:1px solid var(--line); overflow:hidden}
+.fact .vis img{width:100%; height:100%; object-fit:cover; display:block}
+.fact .vis svg{width:100%; height:100%; display:block}
+.fact .ft{padding:14px 16px 16px}
+/* Motion and graphics */
+.ic{width:22px; height:22px; fill:none; stroke:currentColor; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; flex:none}
+.icb{display:inline-grid; place-items:center; width:42px; height:42px; border-radius:12px; background:var(--teal-soft); color:var(--teal); margin-bottom:12px}
+.icb.red{background:var(--accent-soft); color:var(--accent)}
+.reveal{transition:transform .7s cubic-bezier(.2,.7,.2,1), opacity .7s}
+.js .reveal.pre{transform:translateY(18px); opacity:.35}
+@media (prefers-reduced-motion:reduce){ .js .reveal.pre{transform:none; opacity:1} }
+.lift{transition:transform .25s, box-shadow .25s, border-color .25s}
+.lift:hover{transform:translateY(-3px); box-shadow:0 14px 30px rgba(20,39,58,.12); border-color:var(--teal)}
+@media (prefers-reduced-motion:reduce){ .lift:hover{transform:none} }
+.col .head{display:flex; align-items:center; gap:12px; margin-bottom:12px}
+.col .head .icb{margin:0}
+.col .head h3{margin:0}
+.col li::marker{color:var(--teal)}
+.stack{display:flex; flex-wrap:wrap; gap:8px; margin-top:18px}
+.stack .grp{font:600 11px var(--mono); letter-spacing:.06em; color:var(--muted); align-self:center; margin-right:2px}
+.pill{display:inline-flex; align-items:center; gap:7px; font:600 13px var(--body); padding:7px 12px; border-radius:999px; background:var(--surface); border:1px solid var(--line); color:var(--ink)}
+.pill i{width:8px; height:8px; border-radius:50%; background:var(--teal)}
+.pill.c i{background:#2F6FD6} .pill.a i{background:#E38B2C} .pill.j i{background:#2563EB} .pill.f i{background:var(--accent)} .pill.u i{background:#8B5CF6}
+.badge{display:inline-flex; align-items:center; gap:6px; font:600 12px var(--mono); letter-spacing:.04em; padding:6px 10px; border-radius:8px; background:var(--teal-soft); color:var(--teal)}
+.badges{display:flex; flex-wrap:wrap; gap:8px; margin-top:12px}
+.result{position:relative; overflow:hidden}
+.result .viz{margin-top:14px; height:46px}
+.result .viz svg{width:100%; height:100%; display:block}
+.bar{height:8px; border-radius:6px; background:var(--line); overflow:hidden; margin-top:8px}
+.bar b{display:block; height:100%; border-radius:6px; background:var(--teal); width:var(--w); transition:width 1.4s cubic-bezier(.2,.7,.2,1)}
+.bar.red b{background:var(--accent)}
+.js .pre .bar b{width:0}
+.vlbl{display:flex; justify-content:space-between; font:500 11px var(--mono); color:var(--muted); margin-top:6px}
+.dots{display:grid; grid-template-columns:repeat(16,1fr); gap:5px; margin-top:14px}
+.dots i{aspect-ratio:1; border-radius:50%; background:var(--teal); transition:transform .4s, opacity .4s}
+.js .pre .dots i{transform:scale(.2); opacity:.2}
+.gates{display:grid; grid-template-columns:repeat(5,1fr); gap:4px; margin-top:14px}
+.gates span{height:8px; border-radius:4px; background:var(--teal); transition:opacity .4s}
+.js .pre .gates span{opacity:.15}
+.gates + .vlbl{font-size:10px}
+.wk{display:grid; grid-template-columns:repeat(10,1fr); gap:4px; margin-top:14px}
+.wk span{height:22px; border-radius:4px; background:var(--teal); transition:opacity .3s}
+.js .pre .wk span{opacity:.15}
+.arc{stroke:var(--line); stroke-width:10; fill:none; stroke-linecap:round}
+.arcv{stroke:var(--accent); stroke-width:10; fill:none; stroke-linecap:round; transition:stroke-dashoffset 1.6s cubic-bezier(.2,.7,.2,1)}
+tbody tr{transition:background .2s}
+tbody tr:hover{background:var(--teal-soft)}
+td .cell{display:flex; gap:10px; align-items:flex-start}
+td .cell .ic{color:var(--teal); margin-top:2px}
+td .arrow{color:var(--accent); font-weight:700; margin-right:6px}
+.dec{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; position:relative}
+@media (max-width:900px){ .dec{grid-template-columns:repeat(2,minmax(0,1fr))} }
+@media (max-width:520px){ .dec{grid-template-columns:1fr} }
+.dec .card{position:relative}
+.dec .step{font:600 11px var(--mono); color:var(--accent); letter-spacing:.06em}
+.dec .card h3{margin-top:4px}
+.track{height:3px; background:var(--line); border-radius:2px; margin:0 0 18px; overflow:hidden}
+.track b{display:block; height:100%; width:100%; background:linear-gradient(90deg,var(--teal),var(--accent)); transform-origin:left; transition:transform 1.6s cubic-bezier(.2,.7,.2,1)}
+.js .pre .track b{transform:scaleX(0)}
+.lessons2{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px}
+@media (max-width:640px){ .lessons2{grid-template-columns:1fr} }
+.lesson{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:18px; display:flex; gap:14px}
+.lesson .icb{margin:0}
+.lesson b{display:block; font:600 16px var(--display); margin-bottom:4px}
+.lesson p{margin:0; color:var(--muted); font-size:15px}
+.critl{list-style:none; padding:0 !important; margin:10px 0 0 !important}
+.critl li{display:flex; gap:10px; align-items:flex-start; margin-bottom:10px}
+.critl .ic{width:18px; height:18px; margin-top:3px}
+.good .ic{color:var(--teal)} .bad .ic{color:var(--warn)}
+.idea2{display:grid; grid-template-columns:minmax(0,1.5fr) minmax(0,1fr); gap:22px; align-items:center}
+@media (max-width:760px){ .idea2{grid-template-columns:1fr} }
+.mock{background:var(--bg); border:1px solid var(--line); border-radius:16px; padding:16px; min-height:150px; display:grid; gap:10px; align-content:center}
+.mock .mt{font:600 11px var(--mono); color:var(--muted); letter-spacing:.06em}
+.steps3{display:grid; grid-template-columns:repeat(3,1fr); gap:6px}
+.steps3 div{font:600 12px var(--body); text-align:center; padding:8px 4px; border-radius:8px; background:var(--surface); border:1px solid var(--line); color:var(--muted); transition:all .3s}
+.steps3 div.on{background:var(--teal); color:var(--surface); border-color:var(--teal)}
+.steps3 div.wait{background:var(--accent-soft); color:var(--accent); border-color:var(--accent)}
+.mock .note2{font-size:12.5px; color:var(--muted)}
+.tile{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center}
+.tile .v{font:700 22px var(--display)}
+.fresh{display:inline-flex; align-items:center; gap:6px; font:600 11.5px var(--body); color:var(--teal)}
+.fresh i{width:8px; height:8px; border-radius:50%; background:currentColor}
+@media (prefers-reduced-motion:no-preference){ .fresh i{animation:pulse 1.8s ease-in-out infinite} }
+@keyframes pulse{0%,100%{opacity:1; transform:scale(1)}50%{opacity:.35; transform:scale(.7)}}
+.fresh.old{color:var(--warn)}
+.wgrid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px}
+.wdg{background:var(--surface); border:1px solid var(--line); border-radius:14px; padding:10px 12px}
+.wdg span{display:block; font:500 11px var(--body); color:var(--muted)}
+.wdg b{font:700 18px var(--display)}
+.wdg .bar{margin-top:6px}
+.agentdot{fill:var(--accent)}
+/* Facts and results */
+.facts{display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:12px; margin-top:26px}
+.fact{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:14px 16px}
+.fact span{display:block; font-size:13px; color:var(--muted)}
+.fact b{font-weight:600}
+.results{display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px}
+.result{background:var(--surface); border:1px solid var(--line); border-left:4px solid var(--accent); border-radius:10px; padding:18px}
+.big{font:700 34px var(--display); font-variant-numeric:tabular-nums; line-height:1.1}
+.result p{margin:6px 0 0; color:var(--muted); font-size:15px}
+
+/* Lens table */
+.tablewrap{overflow-x:auto; background:var(--surface); border:1px solid var(--line); border-radius:12px}
+table{border-collapse:collapse; width:100%; min-width:720px; font-size:15px}
+th,td{text-align:left; padding:14px 16px; border-bottom:1px solid var(--line); vertical-align:top}
+th{font:600 12px var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--muted); background:var(--bg)}
+tr:last-child td{border-bottom:0}
+td:first-child{font-weight:600}
+td:last-child{color:var(--teal); font-weight:500}
+
+.grid2{display:grid; grid-template-columns:repeat(2,1fr); gap:14px}
+@media (max-width:640px){ .grid2{grid-template-columns:1fr} }
+.card{background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:18px}
+.card p{margin:0; color:var(--muted); font-size:15.5px}
+ul.lessons{padding-left:20px; margin:0}
+ul.lessons li{margin-bottom:8px}
+.caption{font-size:14px; color:var(--muted); margin-top:12px}
+footer{margin-top:60px; padding-top:20px; border-top:1px solid var(--line); color:var(--muted); font-size:14px}
+a{color:var(--teal)}
+@media (max-width:420px){ body{font-size:16px} .big{font-size:28px} }
+</style>
+</head>
+<body id="top">
+<nav class="topnav" aria-label="Page menu"><div class="in">
+  <a class="brand" href="#top">Amir Pournajib<span>.</span></a>
+  <ul>
+    <li><a class="m" href="#fit">Fit at a glance</a></li>
+    <li><a class="m" href="#rivian">My take on the app</a></li>
+    <li><a class="x" href="../">Full portfolio ↗</a></li>
+    <li><a class="m" href="#contact">Contact</a></li>
+  </ul>
+</div></nav>
+<div class="wrap">
+
+  <div class="intro" style="margin-top:0">
+    <div class="label">For the Senior Product Manager, Mobile App role at Rivian and VW Group Technologies</div>
+    <p>A vehicle owner app is a companion app for a very large connected device. I have spent seven years building exactly that kind of product: phone apps that talk to hardware over unreliable links, a cloud in the middle, and AI on top. Below is how my work lines up with what the owner app team needs, and my view of the Rivian app today. The full case studies are in <a href="../" style="color:var(--bg);text-decoration:underline">my portfolio</a>.</p>
+  </div>
+
+  <section style="margin-top:28px" id="fit" aria-labelledby="fit-h">
+    <div class="label">What the role asks for, and where I have done it</div>
+    <h2 id="fit-h">Fit at a glance</h2>
+    <p class="read" style="color:var(--muted);margin-top:-4px">Six things the owner app role asks for, and where I have already done them.</p>
+    <div class="fit reveal">
+      <div class="fitc"><div class="vis"><img src="../hg-app-web.jpg" alt="HealthGauge phone app and web dashboard" loading="lazy" style="object-position:20% 50%"></div><div class="txt"><div class="ask">Companion apps for connected hardware</div><div class="proof"><b>HealthGauge</b> watch app over Bluetooth, and the <b>Texavie</b> hub streaming 32 channels to a phone.</div></div></div>
+      <div class="fitc"><div class="vis"><img src="../hg-widgets.jpg" alt="HealthGauge widget settings screen" loading="lazy" style="object-position:50% 30%"></div><div class="txt"><div class="ask">Status, controls and notifications</div><div class="proof">Device status, sync state, alerts and user-chosen home-screen widgets in the <b>HealthGauge</b> app.</div></div></div>
+      <div class="fitc"><div class="vis"><svg viewBox="0 0 320 200" aria-hidden="true"><rect class="bg" width="320" height="200"/>
+<rect class="card" x="28" y="34" width="264" height="132" rx="12"/>
+<text class="mut" x="46" y="62" font-size="11" font-weight="600" letter-spacing="1">COMMAND LATENCY</text>
+<path class="ln" d="M46 140 H274"/>
+<path class="tl" d="M46 128 L86 120 L126 124 L166 92 L206 110 L246 102 L274 104"/>
+<circle class="af" cx="166" cy="92" r="5"/><text class="ink" x="176" y="86" font-size="11" font-weight="600">p95 spike</text>
+<rect class="soft" x="46" y="150" width="70" height="8" rx="4"/><rect class="tf" x="46" y="150" width="58" height="8" rx="4"/>
+<text class="mut" x="124" y="158" font-size="10.5">success rate</text>
+<g transform="translate(236 46)"><rect class="tf" x="0" y="14" width="6" height="8" rx="1"/><rect class="tf" x="9" y="9" width="6" height="13" rx="1"/><rect class="tf" x="18" y="4" width="6" height="18" rx="1"/><rect class="ln" x="27" y="0" width="6" height="22" rx="1" style="stroke-width:1.5"/></g>
+</svg></div><div class="txt"><div class="ask">Quality: latency, reliability, wake</div><div class="proof">Kept a third-party watch paired on Android and designed around a cloud round trip before every result.</div></div></div>
+      <div class="fitc"><div class="vis"><img src="../tx-bench.webp" alt="Concept illustration of the Texavie development bench" loading="lazy"></div><div class="txt"><div class="ask">End to end, phone to hardware</div><div class="proof">Designed the <b>Texavie</b> hub from schematic and PCB to the enclosed product, then the app and cloud on top.</div></div></div>
+      <div class="fitc"><div class="vis"><svg viewBox="0 0 320 200" aria-hidden="true"><rect class="bg" width="320" height="200"/>
+<g font-size="11" font-weight="600">
+<rect class="card" x="20" y="28" width="78" height="30" rx="8"/><text class="ink" x="59" y="47" text-anchor="middle">Device</text>
+<rect class="card" x="20" y="68" width="78" height="30" rx="8"/><text class="ink" x="59" y="87" text-anchor="middle">Mobile</text>
+<rect class="card" x="20" y="108" width="78" height="30" rx="8"/><text class="ink" x="59" y="127" text-anchor="middle">Cloud</text>
+<rect class="card" x="20" y="148" width="78" height="30" rx="8"/><text class="ink" x="59" y="167" text-anchor="middle">Data science</text>
+</g>
+<path class="tl" d="M98 43 C150 43 150 100 196 100 M98 83 C150 83 150 100 196 100 M98 123 C150 123 150 100 196 100 M98 163 C150 163 150 100 196 100"/>
+<rect x="196" y="52" width="100" height="96" rx="14" class="soft" stroke="var(--teal)" stroke-width="2"/>
+<text class="ink" x="246" y="94" text-anchor="middle" font-size="13" font-weight="700">One</text>
+<text class="ink" x="246" y="112" text-anchor="middle" font-size="13" font-weight="700">roadmap</text>
+</svg></div><div class="txt"><div class="ask">One coherent app, many teams</div><div class="proof">One roadmap across device, mobile, web, cloud and data science at <b>HealthGauge</b>.</div></div></div>
+      <div class="fitc"><div class="vis"><svg viewBox="0 0 320 200" aria-hidden="true"><rect class="bg" width="320" height="200"/>
+<rect class="card" x="22" y="74" width="72" height="52" rx="10"/><text class="ink" x="58" y="105" text-anchor="middle" font-size="11.5" font-weight="600">Intake</text>
+<rect x="124" y="64" width="72" height="72" rx="36" class="asoft" stroke="var(--accent)" stroke-width="2"/><text class="ink" x="160" y="98" text-anchor="middle" font-size="12" font-weight="700">AI</text><text class="ink" x="160" y="113" text-anchor="middle" font-size="11" font-weight="600">agent</text>
+<rect class="card" x="226" y="34" width="74" height="40" rx="10"/><text class="ink" x="263" y="58" text-anchor="middle" font-size="11" font-weight="600">Clinician</text>
+<rect class="card" x="226" y="126" width="74" height="40" rx="10"/><text class="ink" x="263" y="150" text-anchor="middle" font-size="11" font-weight="600">Lab</text>
+<path class="tl" d="M94 100 H122"/><path class="tl" d="M196 92 C212 80 214 60 226 56"/><path class="tl" d="M196 108 C212 120 214 140 226 144"/>
+<text class="mut" x="160" y="178" text-anchor="middle" font-size="11">10 weeks to MVP · triage time −40%</text>
+</svg></div><div class="txt"><div class="ask">AI tools and LLM experiences</div><div class="proof">AI agents and LLM features at <b>My Fertility Labs</b>, live in 10 weeks.</div></div></div>
+    </div>
+  </section>
+
+
+  <article class="cs" id="rivian" style="margin-top:64px">
+    <div class="label">Looking ahead</div>
+    <h2 style="font-size:clamp(26px,4vw,36px)">My take on the Rivian app today</h2>
+    <p class="lede read">I read owner reviews and forum threads to understand where the app delights people and where it lets them down. The pattern is familiar: when the link to the device is weak, the whole product feels weak.</p>
+
+    <section style="margin-top:28px">
+      <div class="crit reveal">
+        <div class="card lift"><div class="head" style="display:flex;gap:12px;align-items:center"><span class="icb" style="margin:0"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg></span><h3 style="margin:0">What works well</h3></div><ul class="critl good"><li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg><span>Frequent updates that owners notice and appreciate.</span></li><li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg><span>The new Apple Watch app: lock, climate and charge target from the wrist, with up to four quick controls.</span></li><li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg><span>Passive entry with the Gen 2 digital key: walk up and the vehicle unlocks.</span></li><li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg><span>Consistent icons for Climate, Energy and Gear Guard across phone and watch.</span></li></ul></div>
+        <div class="card lift"><div class="head" style="display:flex;gap:12px;align-items:center"><span class="icb red" style="margin:0"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></svg></span><h3 style="margin:0">Where owners struggle</h3></div><ul class="critl bad"><li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></svg><span>Commands stall at "waking vehicle", and some owners say remote access works only part of the time.</span></li><li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></svg><span>Commands often work only when the phone is close enough for Bluetooth.</span></li><li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></svg><span>The phone as key can feel slow.</span></li><li><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18v.5"/></svg><span>Requests for home-screen widgets, door and window status, and charging history.</span></li></ul></div>
+      </div>
+    </section>
+
+    <section style="margin-top:28px">
+      <div class="label">Three things I would explore first</div>
+      <div class="ideas reveal">
+        <div class="idea lift"><div class="idea2"><div><h3>1. Make every remote command honest about its state</h3><p>Show each step (sent, waking vehicle, done) with the typical wait time, retry on its own, and switch to Bluetooth automatically when the owner is nearby. A clear "still trying" beats a silent failure.</p><div class="metric">Measure: command success rate, p95 command latency (time the slowest 5% take), retries per command</div><div class="from">From my work: at HealthGauge every result needed a cloud round trip, and the app had to show progress so people trusted the answer.</div></div><div class="mock" aria-label="Illustration: remote command progress"><div class="mt">UNLOCK · REMOTE COMMAND</div><div class="steps3" id="cmdsteps"><div>Sent</div><div>Waking vehicle</div><div>Done</div></div><div class="note2" id="cmdnote">Usually takes about 8 seconds</div><div class="bar"><b id="cmdbar" style="--w:0%;transition:width .9s"></b></div></div></div></div>
+        <div class="idea lift"><div class="idea2"><div><h3>2. Show how fresh every number is</h3><p>Put "updated 2 minutes ago" next to charge, range and lock state, and mark stale data clearly. Owners forgive old data; they do not forgive data that looks current and is wrong.</p><div class="metric">Measure: share of sessions showing stale status, time since last vehicle update</div><div class="from">From my work: when the watch lost its connection, gaps in readings did more damage to trust than any single bad number.</div></div><div class="mock" aria-label="Illustration: status tiles with freshness"><div class="mt">VEHICLE STATUS</div><div class="tile"><div><span class="mt">CHARGE</span><div class="v">78%</div></div><span class="fresh"><i></i>Updated 2 min ago</span></div><div class="tile"><div><span class="mt">LOCKS</span><div class="v">Locked</div></div><span class="fresh old"><i></i>Last seen 3 h ago</span></div></div></div></div>
+        <div class="idea lift"><div class="idea2"><div><h3>3. Bring the vehicle to the home screen</h3><p>Widgets for battery, lock state and climate, chosen by the owner, so the most common checks never need the app to open and wake the vehicle.</p><div class="metric">Measure: widget adoption, app opens per owner, vehicle wake-ups per day</div><div class="from">From my work: HealthGauge let users pick their own health widgets for exactly this reason.</div></div><div class="mock" aria-label="Illustration: home-screen widgets"><div class="mt">HOME SCREEN</div><div class="wgrid"><div class="wdg"><span>Battery</span><b>78%</b><div class="bar"><b style="--w:78%"></b></div></div><div class="wdg"><span>Locks</span><b>Locked</b></div><div class="wdg"><span>Cabin</span><b>21°C</b></div><div class="wdg"><span>Range</span><b>412 km</b></div></div></div></div></div>
+      </div>
+    </section>
+    <p class="caption">Mockups are my own illustrations with example values. Based on public owner reviews, owner forum threads and Rivian's own release notes. I have not worked at Rivian; these are starting points I would test with data and the team.</p>
+  </article>
+
+  <section style="margin-top:56px">
+    <div class="intro" style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;justify-content:space-between">
+      <p style="max-width:60ch">See the full case studies: cuffless blood pressure at HealthGauge, the Texavie smart glove hub, and AI agents at My Fertility Labs.</p>
+      <a href="../" style="font:600 15px var(--body);background:var(--accent);color:#fff;padding:12px 18px;border-radius:10px;text-decoration:none">Open my portfolio ↗</a>
+    </div>
+  </section>
+
+  <footer id="contact">
+    <h2 style="font-size:20px;color:var(--ink);margin-bottom:8px">Let's talk</h2>Amir Pournajib, PMP · North Vancouver, BC<br>Email: pournajib.a@gmail.com · <a href="https://www.linkedin.com/in/amir-pournajib">linkedin.com/in/amir-pournajib</a><br><br>
+    Product images are from the HealthGauge website. The Texavie image is an AI concept illustration from my own description. Mockups and diagrams are my own, with example values.
+  </footer>
+</div>
+
+<script>
+(function(){
+  document.documentElement.classList.add('js');
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var els=[].slice.call(document.querySelectorAll('.reveal'));
+  function fmt(v,el){ var n=Math.round(v); if(el.dataset.comma) n=n.toLocaleString('en-US'); return (el.dataset.pre||'')+n+(el.dataset.suf||''); }
+  function count(root){
+    [].slice.call(root.querySelectorAll('[data-count]')).forEach(function(el){
+      if(reduce||el.dataset.done) return; el.dataset.done=1;
+      var to=+el.dataset.count, from=+(el.dataset.from||0), t0=null, d=1300;
+      function step(t){ if(!t0)t0=t; var p=Math.min(1,(t-t0)/d), e=1-Math.pow(1-p,3); el.textContent=fmt(from+(to-from)*e,el); if(p<1) requestAnimationFrame(step); }
+      requestAnimationFrame(step);
+    });
+    [].slice.call(root.querySelectorAll('.nps')).forEach(function(a){ if(reduce) return; a.style.transition='none'; a.style.strokeDashoffset=69; a.getBoundingClientRect(); requestAnimationFrame(function(){ a.style.transition=''; a.style.strokeDashoffset=53; }); });
+    [].slice.call(root.querySelectorAll('.dots i,.gates span,.wk span')).forEach(function(d,i){ d.style.transitionDelay=(i*35)+'ms'; });
+  }
+  if('IntersectionObserver' in window && !reduce){
+    var vh=window.innerHeight;
+    els.forEach(function(el){ if(el.getBoundingClientRect().top>vh*0.9) el.classList.add('pre'); });
+    var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.remove('pre'); count(e.target); io.unobserve(e.target);} }); },{threshold:0.18});
+    els.forEach(function(el){ io.observe(el); });
+  }
+  // remote command demo
+  var st=document.querySelectorAll('#cmdsteps div'), note=document.getElementById('cmdnote'), bar=document.getElementById('cmdbar');
+  if(st.length){
+    var seq=[[0,'Sent to vehicle',20],[1,'Waking vehicle... still trying, 5 s',60],[2,'Unlocked in 8 s',100]], k=0;
+    function tick(){ st.forEach(function(d,i){ d.className = i<seq[k][0]?'on':(i===seq[k][0]?(k===1?'wait':'on'):''); }); note.textContent=seq[k][1]; bar.style.setProperty('--w',seq[k][2]+'%'); k=(k+1)%seq.length; }
+    tick(); if(!reduce) setInterval(tick,1800);
+  }
+})();
+</script>
+<script>
+(function(){
+  var links=[].slice.call(document.querySelectorAll('.topnav a.m'));
+  var map={}; links.forEach(function(a){ map[a.getAttribute('href').slice(1)]=a; });
+  var ids=Object.keys(map), current=null;
+  function setActive(id){ if(id===current) return; current=id; links.forEach(function(a){ a.classList.toggle('active', a===map[id]); if(a===map[id]){ a.setAttribute('aria-current','true'); try{ a.scrollIntoView({block:'nearest',inline:'nearest'}); }catch(e){} } else a.removeAttribute('aria-current'); }); }
+  function onScroll(){
+    var y=window.scrollY+120, best=null;
+    var bestTop=-1;
+    ids.forEach(function(id){ var el=document.getElementById(id); if(!el) return; var t=el.getBoundingClientRect().top+window.scrollY; if(t<=y && t>bestTop){ bestTop=t; best=id; } });
+    if((window.innerHeight+window.scrollY)>=document.body.scrollHeight-4) best='contact';
+    setActive(best);
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+})();
+</script>
+</body>
+</html>
